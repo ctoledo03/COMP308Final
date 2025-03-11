@@ -27,7 +27,7 @@ function UserComponent() {
         onCompleted: () => {
             console.log("✅ Login successful, reloading page...");
 
-            window.location.reload();  // ✅ Ensures the browser fetches the new cookie
+            // window.location.reload();  // ✅ Ensures the browser fetches the new cookie
 
             // Dispatch custom event upon successful login
             window.dispatchEvent(new CustomEvent('loginSuccess', { detail: { isLoggedIn: true } }));

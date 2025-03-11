@@ -1,30 +1,61 @@
-// shell-app/src/App.jsx
-// Add these imports at the top of your App.jsx in shell-app
-import React, { lazy, Suspense } from 'react';
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { useQuery, gql } from '@apollo/client';
 import './App.css';
 
-// Create an instance of ApolloClient
-const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql', // Adjust this URI to your GraphQL server
-  cache: new InMemoryCache(),
-});
+const UserAuth = lazy(() => import('userAuth/App'));
+const CommEngagementApp = lazy(() => import('commEngagement/App'));
 
-const UserAuthComponent = lazy(() => import('userAuth/App'));
-// const CommunityEngagementComponent = lazy(() => import('commEngagement/CommunityComponent'));
+// GraphQL query to check the current user's authentication status
+const CURRENT_USER_QUERY = gql`
+  query me {
+    me {
+      username
+    }
+  }
+`;
 
 function App() {
+  // Check for token in localStorage initially
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+
+  // Apollo useQuery for authentication check
+  const { loading, error, data } = useQuery(CURRENT_USER_QUERY, {
+    fetchPolicy: 'network-only',
+  });
+
+  useEffect(() => {
+    // Listen for the loginSuccess event
+    const handleLoginSuccess = (event) => {
+      setIsLoggedIn(event.detail.isLoggedIn);
+      console.log('✅ Received loginSuccess event in ShellApp:', event.detail.isLoggedIn);
+    };
+
+    window.addEventListener('loginSuccess', handleLoginSuccess);
+
+    // Update state if the query succeeds
+    if (!loading && !error && data?.me) {
+      setIsLoggedIn(true);
+      localStorage.setItem('token', 'some-placeholder-token'); // Ensure token stays
+    } else if (!loading && error) {
+      setIsLoggedIn(false);
+      localStorage.removeItem('token'); // Remove invalid token
+    }
+
+    return () => {
+      window.removeEventListener('loginSuccess', handleLoginSuccess);
+    };
+  }, [loading, error, data]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error! {error.message}</div>;
+
   return (
-    <ApolloProvider client={client}> {/* Wrap your app or relevant parts with ApolloProvider */}
-      <div className='App'>
-        <header className='App-header'>
-          <Suspense fallback={<div>Loading Components...</div>}>
-            <UserAuthComponent />
-            {/* <CommunityEngagementComponent /> */}
-          </Suspense>
-        </header>
-      </div>
-    </ApolloProvider>
+    <div className="App">
+      <Suspense fallback={<div>Loading...</div>}>
+        {!isLoggedIn ? <UserAuth /> : <CommEngagementApp />}
+        <h1>Shell App</h1>
+      </Suspense>
+    </div>
   );
 }
 
