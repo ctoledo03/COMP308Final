@@ -9,7 +9,6 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use a secure 
 const resolvers = {
     Query: {
         me: (_, __, context) => {
-            console.log("🔍 Debugging context:", context);  // ✅ Debugging
             const { req } = context;
         
             if (!req || !req.cookies) {  // ✅ Ensure `req` exists

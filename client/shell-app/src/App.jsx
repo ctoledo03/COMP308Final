@@ -1,3 +1,4 @@
+// shell-app/src/App.jsx
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import './App.css';
@@ -15,30 +16,25 @@ const CURRENT_USER_QUERY = gql`
 `;
 
 function App() {
-  // Check for token in localStorage initially
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Apollo useQuery for authentication check
+  // Use Apollo's useQuery hook to perform the authentication status check on app load
   const { loading, error, data } = useQuery(CURRENT_USER_QUERY, {
     fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    // Listen for the loginSuccess event
+    // Listen for the custom loginSuccess event from the UserApp
     const handleLoginSuccess = (event) => {
       setIsLoggedIn(event.detail.isLoggedIn);
-      console.log('✅ Received loginSuccess event in ShellApp:', event.detail.isLoggedIn);
+      console.log('✅ Received loginSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
 
     window.addEventListener('loginSuccess', handleLoginSuccess);
 
-    // Update state if the query succeeds
-    if (!loading && !error && data?.me) {
-      setIsLoggedIn(true);
-      localStorage.setItem('token', 'some-placeholder-token'); // Ensure token stays
-    } else if (!loading && error) {
-      setIsLoggedIn(false);
-      localStorage.removeItem('token'); // Remove invalid token
+    // Check the authentication status based on the query's result
+    if (!loading && !error) {
+      setIsLoggedIn(!!data.me);
     }
 
     return () => {
@@ -53,10 +49,10 @@ function App() {
     <div className="App">
       <Suspense fallback={<div>Loading...</div>}>
         {!isLoggedIn ? <UserAuth /> : <CommEngagementApp />}
-        <h1>Shell App</h1>
       </Suspense>
     </div>
   );
 }
 
 export default App;
+
