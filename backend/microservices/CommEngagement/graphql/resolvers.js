@@ -25,7 +25,7 @@ const resolvers = {
 	Mutation: {
 		addCommunityPost: async (_, { title, content, category }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
-			console.log('user:', user);
+			console.log('Creating post with user:', user);
 
 			const newPost = new CommunityPost({
 				author: user.user._id,
@@ -41,14 +41,30 @@ const resolvers = {
 
 			const post = await CommunityPost.findById(id);
 			if (!post) throw new GraphQLError('Post not found');
-			if (post.author.toString() !== user.id) throw new GraphQLError('Unauthorized');
+			
+			console.log('Auth Check:', {
+				postAuthor: post.author.toString(),
+				userId: user.user._id,
+				fullUser: user,
+				match: post.author.toString() === user.user._id
+			});
 
-			post.title = title || post.title;
-			post.content = content || post.content;
-			post.category = category || post.category;
+			if (post.author.toString() !== user.user._id) {
+				throw new GraphQLError('Unauthorized');
+			}
+
+			if (title !== undefined) post.title = title;
+			if (content !== undefined) post.content = content;
+			if (category !== undefined) post.category = category;
 			post.updatedAt = new Date();
-			await post.save();
-			return true;
+
+			try {
+				await post.save();
+				return true;
+			} catch (error) {
+				console.error('Error saving post:', error);
+				throw new GraphQLError('Failed to update post');
+			}
 		},
 
 		deleteCommunityPost: async (_, { id }, { user }) => {
@@ -56,7 +72,17 @@ const resolvers = {
 
 			const post = await CommunityPost.findById(id);
 			if (!post) throw new GraphQLError('Post not found');
-			if (post.author.toString() !== user.id) throw new GraphQLError('Unauthorized');
+			
+			console.log('Deleting post:', {
+				postId: id,
+				postAuthor: post.author,
+				currentUser: user,
+				userId: user.user._id
+			});
+
+			if (post.author.toString() !== user.user._id) {
+				throw new GraphQLError('Unauthorized');
+			}
 
 			await post.deleteOne();
 			return true;
@@ -64,10 +90,12 @@ const resolvers = {
 
 		addHelpRequest: async (_, { description, location }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
+			
 			const newRequest = new HelpRequest({
-				author: user.id,
+				author: user.user._id,
 				description,
-				location
+				location,
+				volunteers: []
 			});
 			return await newRequest.save();
 		},
@@ -75,39 +103,45 @@ const resolvers = {
 		editHelpRequest: async (_, { id, description, location, isResolved }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 
-			const helpRequest = await HelpRequest.findById(id);
-			if (!helpRequest) throw new GraphQLError('Help request not found');
-			if (helpRequest.author.toString() !== user.id) throw new GraphQLError('Unauthorized');
+			const request = await HelpRequest.findById(id);
+			if (!request) throw new GraphQLError('Help request not found');
+			if (request.author.toString() !== user.user._id) throw new GraphQLError('Unauthorized');
 
-			helpRequest.description = description || helpRequest.description;
-			helpRequest.location = location || helpRequest.location;
-			helpRequest.isResolved = isResolved !== undefined ? isResolved : helpRequest.isResolved;
-			helpRequest.updatedAt = new Date();
-			await helpRequest.save();
+			if (description) request.description = description;
+			if (location !== undefined) request.location = location;
+			if (isResolved !== undefined) request.isResolved = isResolved;
+			request.updatedAt = new Date();
+			
+			await request.save();
 			return true;
 		},
 
 		deleteHelpRequest: async (_, { id }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 
-			const helpRequest = await HelpRequest.findById(id);
-			if (!helpRequest) throw new GraphQLError('Help request not found');
-			if (helpRequest.author.toString() !== user.id) throw new GraphQLError('Unauthorized');
+			const request = await HelpRequest.findById(id);
+			if (!request) throw new GraphQLError('Help request not found');
+			if (request.author.toString() !== user.user._id) throw new GraphQLError('Unauthorized');
 
-			await helpRequest.deleteOne();
+			await request.deleteOne();
 			return true;
 		},
 
 		volunteer: async (_, { helpRequestId }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 
-			const helpRequest = await HelpRequest.findById(helpRequestId);
-			if (!helpRequest) throw new GraphQLError('Help request not found');
-			if (helpRequest.author.toString() === user.id) throw new GraphQLError('You cannot volunteer for your own request');
+			const request = await HelpRequest.findById(helpRequestId);
+			if (!request) throw new GraphQLError('Help request not found');
+			
+			// Can't volunteer for your own request
+			if (request.author.toString() === user.user._id) {
+				throw new GraphQLError('Cannot volunteer for your own request');
+			}
 
-			if (!helpRequest.volunteers.includes(user.id)) {
-				helpRequest.volunteers.push(user.id);
-				await helpRequest.save();
+			// Check if already volunteered
+			if (!request.volunteers.includes(user.user._id)) {
+				request.volunteers.push(user.user._id);
+				await request.save();
 			}
 
 			return true;

@@ -8,8 +8,8 @@ const LOGIN_MUTATION = gql`
 `;
 
 const REGISTER_MUTATION = gql`
-  mutation Register($username: String!, $password: String!) {
-    register(username: $username, password: $password)
+  mutation Signup($username: String!, $email: String!, $password: String!, $role: UserRole!) {
+    signup(username: $username, email: $email, password: $password, role: $role)
   }
 `;
 
@@ -19,6 +19,8 @@ function UserComponent() {
   const [activeTab, setActiveTab] = useState('login');
   const [authError, setAuthError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('resident');
 
   const [login] = useMutation(LOGIN_MUTATION, {
     onCompleted: () => {
@@ -43,16 +45,27 @@ function UserComponent() {
     setIsSubmitting(true);
     setAuthError('');
 
-    if (!username || !password) {
-      setAuthError('Username and password are required.');
-      setIsSubmitting(false);
-      return;
-    }
-
     if (activeTab === 'login') {
+      if (!username || !password) {
+        setAuthError('Username and password are required.');
+        setIsSubmitting(false);
+        return;
+      }
       await login({ variables: { username, password } });
     } else {
-      await register({ variables: { username, password } });
+      if (!username || !password || !email) {
+        setAuthError('Username, email and password are required.');
+        setIsSubmitting(false);
+        return;
+      }
+      await register({ 
+        variables: { 
+          username, 
+          email, 
+          password, 
+          role 
+        } 
+      });
     }
     setIsSubmitting(false);
   };
@@ -101,6 +114,36 @@ function UserComponent() {
               className="w-full mt-2 p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {activeTab === 'signup' && (
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-lg font-medium">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mt-2 p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {activeTab === 'signup' && (
+            <div className="mb-4">
+              <label htmlFor="role" className="block text-lg font-medium">Role</label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full mt-2 p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="resident">Resident</option>
+                <option value="business_owner">Business Owner</option>
+                <option value="community_organizer">Community Organizer</option>
+              </select>
+            </div>
+          )}
 
           {authError && <div className="text-red-500 mb-4">{authError}</div>}
 

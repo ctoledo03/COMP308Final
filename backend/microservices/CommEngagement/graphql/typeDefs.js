@@ -16,7 +16,7 @@ const typeDefs = `#graphql
 		description: String!
 		location: String
 		isResolved: Boolean!
-		volunteers: [ID!]!
+		volunteers: [ID!]
 		createdAt: String!
 		updatedAt: String
 	}

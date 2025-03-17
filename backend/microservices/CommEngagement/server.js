@@ -1,4 +1,4 @@
- // server/microservices/product-service/product-microservice.js
+// server/microservices/product-service/product-microservice.js
 // Import required modules
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
