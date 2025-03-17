@@ -111,7 +111,7 @@ function UserComponent() {
           >
             {isSubmitting ? (
               <div className="flex justify-center items-center">
-                <div className="spinner-border spinner-border-sm text-white" role="status"></div>
+                <div className="spinner-border spinner-border-sm text-white" role="status">Authenticating...</div>
               </div>
             ) : (
               activeTab === 'login' ? 'Login' : 'Sign Up'

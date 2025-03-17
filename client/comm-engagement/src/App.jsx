@@ -15,6 +15,10 @@ const client = new ApolloClient({
 function App() {
   const [selectedPage, setSelectedPage] = useState("CommunityPost");
 
+  const logout = () => {
+    window.dispatchEvent(new CustomEvent('logoutSuccess', { detail: { isLoggedIn: false } })); 
+  }
+
   return (
     <ApolloProvider client={client}>
       <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -24,21 +28,22 @@ function App() {
             <h1 className="text-2xl font-bold">Community Hub</h1>
             <div className="space-x-4">
               <button
-                className={`px-4 py-2 rounded ${
-                  selectedPage === "CommunityPost" ? "bg-blue-600" : "bg-gray-700"
-                }`}
+                className={`px-4 py-2 rounded ${selectedPage === "CommunityPost" ? "bg-blue-600" : "bg-gray-700"}`}
                 onClick={() => setSelectedPage("CommunityPost")}
               >
                 Community Post
               </button>
+
               <button
-                className={`px-4 py-2 rounded ${
-                  selectedPage === "HelpRequest" ? "bg-blue-600" : "bg-gray-700"
-                }`}
-                onClick={() => setSelectedPage("HelpRequest")}
-              >
-                Help Request
+                className={`px-4 py-2 rounded ${selectedPage === "HelpRequest" ? "bg-blue-600" : "bg-gray-700"}`}
+                onClick={() => setSelectedPage("HelpRequest")}>
+                  Help Request
               </button>
+
+              <button className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600" onClick={() => logout()}>
+                Logout
+              </button>
+
             </div>
           </div>
         </nav>

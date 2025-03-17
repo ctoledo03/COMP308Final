@@ -25,9 +25,10 @@ const resolvers = {
 	Mutation: {
 		addCommunityPost: async (_, { title, content, category }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
+			console.log('user:', user);
 
 			const newPost = new CommunityPost({
-				author: user.id,
+				author: user.user._id,
 				title,
 				content,
 				category

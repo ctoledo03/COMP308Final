@@ -51,8 +51,8 @@ async function startServer() {
       if (token) {
         try {
           const decoded = jwt.verify(token, config.JWT_SECRET);
-          user = { username: decoded.username };
-          console.log("✅ Authenticated User:", user);
+          user = decoded;
+          console.log("✅ Authenticated User:", user.user.username);
         } catch (error) {
           console.error("🚨 Token verification failed:", error);
         }

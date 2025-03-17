@@ -1,6 +1,6 @@
 // shell-app/src/App.jsx
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useMutation } from '@apollo/client';
 import './App.css';
 
 const UserAuth = lazy(() => import('userAuth/App'));
@@ -10,13 +10,28 @@ const CommEngagementApp = lazy(() => import('commEngagement/App'));
 const CURRENT_USER_QUERY = gql`
   query me {
     me {
-      username
+      User
     }
+  }
+`;
+
+// GraphQL mutation for logout
+const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    logout
   }
 `;
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [logout] = useMutation(LOGOUT_MUTATION, {
+    onCompleted: () => {
+      console.log("✅ Logged out successfully");
+    },
+    onError: (error) => {
+      console.error("Error logging out:", error);
+    }
+  });
 
   // Use Apollo's useQuery hook to perform the authentication status check on app load
   const { loading, error, data } = useQuery(CURRENT_USER_QUERY, {
@@ -30,7 +45,14 @@ function App() {
       console.log('✅ Received loginSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
 
+    const handleLogoutSuccess = (event) => {
+      setIsLoggedIn(event.detail.isLoggedIn);
+      logout();
+      console.log('✅ Received logoutSuccess event in ShellApp: ' + event.detail.isLoggedIn);
+    };
+
     window.addEventListener('loginSuccess', handleLoginSuccess);
+    window.addEventListener('logoutSuccess', handleLogoutSuccess);
 
     // Check the authentication status based on the query's result
     if (!loading && !error) {

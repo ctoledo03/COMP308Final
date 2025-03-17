@@ -4,8 +4,6 @@ import bcrypt from 'bcrypt';
 import {config} from '../config/config.js';
 import { GraphQLError } from 'graphql';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use a secure secret key
-
 const resolvers = {
     Query: {
         me: (_, __, context) => {
@@ -24,7 +22,7 @@ const resolvers = {
             try {
               console.log("🔍 JWT_SECRET in resolvers.js:", config.JWT_SECRET);
               const decoded = jwt.verify(token, config.JWT_SECRET);
-              return { username: decoded.username };
+              return { User: decoded };
             } catch (error) {
               console.error("Error verifying token:", error);
               return null;
@@ -62,7 +60,7 @@ const resolvers = {
               throw new Error('Invalid password');
             }
         
-            const token = jwt.sign({ username }, config.JWT_SECRET, { expiresIn: '1d' });
+            const token = jwt.sign({ user }, config.JWT_SECRET, { expiresIn: '1d' });
         
             res.cookie('token', token, {
               httpOnly: true, // Prevents JavaScript access
@@ -77,7 +75,9 @@ const resolvers = {
         },
       
         logout(_, __, { res }) {
-            res.clearCookie('authToken');
+            res.clearCookie('token');
+            res.clearCookie('_xsrf');
+            res.clearCookie('username-localhost-8888');
             return true;
         },
     },

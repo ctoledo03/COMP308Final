@@ -52,7 +52,7 @@ async function startServer() {
       if (token) {
         try {
           const decoded = jwt.verify(token, config.JWT_SECRET);
-          user = { username: decoded.username };
+          user = decoded;
         } catch (error) {
           console.error("Error verifying token:", error);
         }
