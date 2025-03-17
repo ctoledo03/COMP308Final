@@ -22,7 +22,7 @@ const resolvers = {
             try {
               console.log("🔍 JWT_SECRET in resolvers.js:", config.JWT_SECRET);
               const decoded = jwt.verify(token, config.JWT_SECRET);
-              return { User: decoded };
+              return { id: decoded.user._id, username: decoded.user.username }
             } catch (error) {
               console.error("Error verifying token:", error);
               return null;

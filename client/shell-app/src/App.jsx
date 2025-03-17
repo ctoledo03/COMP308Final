@@ -10,7 +10,8 @@ const CommEngagementApp = lazy(() => import('commEngagement/App'));
 const CURRENT_USER_QUERY = gql`
   query me {
     me {
-      User
+      id
+      username
     }
   }
 `;
