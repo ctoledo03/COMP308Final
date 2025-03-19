@@ -71,7 +71,7 @@ function App() {
   return (
     <div className="App">
       <Suspense fallback={<div>Loading...</div>}>
-        {!isLoggedIn ? <UserAuth /> : <CommEngagementApp />}
+        {!isLoggedIn ? <UserAuth /> : <CommEngagementApp me={data.me} />}
       </Suspense>
     </div>
   );

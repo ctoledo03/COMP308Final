@@ -9,14 +9,14 @@ const resolvers = {
         me: (_, __, context) => {
             const { req } = context;
         
-            if (!req || !req.cookies) {  // ✅ Ensure `req` exists
+            if (!req || !req.cookies) {  
               console.log("🚨 Request object is missing!");
               return null;
             }
         
             const token = req.cookies.token;
             if (!token) {
-              return null;  // No user is logged in
+              return null;  
             }
         
             try {
@@ -26,7 +26,7 @@ const resolvers = {
               return { 
                 id: decoded.user._id, 
                 username: decoded.user.username,
-                role: decoded.user.role  // Include role
+                role: decoded.user.role 
               }
             } catch (error) {
               console.error("Error verifying token:", error);

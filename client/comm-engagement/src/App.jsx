@@ -15,7 +15,8 @@ const client = new ApolloClient({
   },
 });
 
-function App() {
+const App = ({ me }) => {
+  console.log(me);
   const [selectedPage, setSelectedPage] = useState("CommunityPost");
 
   const logout = () => {
@@ -56,7 +57,7 @@ function App() {
 
           {/* Main Content */}
           <div className="flex-grow flex justify-center items-center p-6">
-            {selectedPage === "CommunityPost" ? <CommunityPostList /> : <HelpRequest />}
+            {selectedPage === "CommunityPost" ? <CommunityPostList me={me} /> : <HelpRequest me={me} />}
           </div>
         </div>
       </div>

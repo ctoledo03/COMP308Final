@@ -118,25 +118,31 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
                     <span className="ml-4">Volunteers: {request.volunteers?.length || 0}</span>
                 </div>
                 <div className="space-x-2">
-                    <button
-                        onClick={handleVolunteer}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                        disabled={request.isResolved}
-                    >
-                        Volunteer
-                    </button>
-                    <button
-                        onClick={() => onEdit(request)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                    >
-                        Delete
-                    </button>
+                    {currentUser !== request.author && (
+                        <button
+                            onClick={handleVolunteer}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                            disabled={request.isResolved}
+                        >
+                            Volunteer
+                        </button>
+                    )}
+                    {currentUser == request.author && (
+                        <div>
+                            <button
+                                onClick={() => onEdit(request)}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -144,7 +150,7 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
 };
 
 // Main HelpRequest list component
-const HelpRequest = () => {
+const HelpRequest = ({ me }) => {
     const { loading, error, data, refetch } = useQuery(GET_HELP_REQUESTS);
     const [addRequest] = useMutation(ADD_HELP_REQUEST, { 
         onCompleted: () => refetch() 
@@ -255,6 +261,7 @@ const HelpRequest = () => {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         refetch={refetch}
+                        currentUser={me.id}
                     />
                 ))}
             </div>

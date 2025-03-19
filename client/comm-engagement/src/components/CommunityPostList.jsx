@@ -17,16 +17,6 @@ const GET_COMMUNITY_POSTS = gql`
   }
 `;
 
-const GET_CURRENT_USER = gql`
-  query Me {
-    me {
-      id
-      username
-      role
-    }
-  }
-`;
-
 const ADD_COMMUNITY_POST = gql`
   mutation AddCommunityPost($title: String!, $content: String!, $category: String!) {
     addCommunityPost(title: $title, content: $content, category: $category) {
@@ -51,9 +41,8 @@ const DELETE_COMMUNITY_POST = gql`
   }
 `;
 
-const CommunityPostList = () => {
+const CommunityPostList = ({ me }) => {
   const { loading, error, data, refetch } = useQuery(GET_COMMUNITY_POSTS);
-  const { data: userData } = useQuery(GET_CURRENT_USER);
   const [addPost] = useMutation(ADD_COMMUNITY_POST, { onCompleted: () => refetch() });
   const [editPost] = useMutation(EDIT_COMMUNITY_POST, { 
     onCompleted: () => refetch(),
@@ -104,7 +93,6 @@ const CommunityPostList = () => {
   };
 
   const handleEdit = (post) => {
-    console.log('Editing post:', post);
     setEditingId(post.id);
     setForm({ title: post.title, content: post.content, category: post.category });
   };
@@ -112,9 +100,6 @@ const CommunityPostList = () => {
   const handleDelete = async (id) => {
     await deletePost({ variables: { id } });
   };
-
-  console.log('Posts data:', data?.communityPosts);
-  console.log('User data:', userData?.me);
 
   if (loading) return <p className="text-white">Loading...</p>;
   if (error) return <p className="text-white">Error loading posts.</p>;
@@ -167,7 +152,7 @@ const CommunityPostList = () => {
             post={post}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            currentUser={userData?.me}
+            currentUser={me.id}
           />
         ))}
       </div>
