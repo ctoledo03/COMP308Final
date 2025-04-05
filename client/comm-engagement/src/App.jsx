@@ -16,7 +16,6 @@ const client = new ApolloClient({
 });
 
 const App = ({ me }) => {
-  console.log(me);
   const [selectedPage, setSelectedPage] = useState("CommunityPost");
 
   const logout = () => {
