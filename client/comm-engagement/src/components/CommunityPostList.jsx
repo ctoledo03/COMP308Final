@@ -43,17 +43,30 @@ const DELETE_COMMUNITY_POST = gql`
 
 const CommunityPostList = ({ me }) => {
   const { loading, error, data, refetch } = useQuery(GET_COMMUNITY_POSTS);
-  const [addPost] = useMutation(ADD_COMMUNITY_POST, { onCompleted: () => refetch() });
+  const [addPost] = useMutation(ADD_COMMUNITY_POST, { 
+    onCompleted: () => {
+      alert("Community Post Successful")
+      refetch();
+    } 
+  });
+
   const [editPost] = useMutation(EDIT_COMMUNITY_POST, { 
-    onCompleted: () => refetch(),
+    onCompleted: () => {
+      alert("Post Edited Successfully");
+      refetch();
+    },
     onError: (error) => {
-      alert("You can only edit your own posts!");
+      alert(error.message);
     }
   });
+
   const [deletePost] = useMutation(DELETE_COMMUNITY_POST, { 
-    onCompleted: () => refetch(),
+    onCompleted: () => {
+      alert("Post Deleted Successfully");
+      refetch();
+    },
     onError: (error) => {
-      alert("You can only delete your own posts!");
+      alert(error.message);
     }
   });
 

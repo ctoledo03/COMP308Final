@@ -62,7 +62,7 @@ const App = ({ me }) => {
             {selectedPage === "CommunityPost" ? <CommunityPostList me={me} /> : <HelpRequestList me={me} />}
           </div>
 
-          <ChatBox />
+          <ChatBox me={me} />
         </div>
       </div>
     </ApolloProvider>

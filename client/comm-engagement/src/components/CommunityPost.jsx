@@ -12,7 +12,7 @@ const CommunityPost = ({ post, onEdit, onDelete, currentUser }) => {
 			<p className="text-gray-300 mb-4">{post.content}</p>
 			<div className="flex items-center justify-between">
 				<span className="text-sm text-gray-400">Category: {post.category}</span>
-				{currentUser !== post.author && (
+				{currentUser == post.author && (
 					<div className="space-x-2">
 						<button
 						onClick={() => onEdit(post)}

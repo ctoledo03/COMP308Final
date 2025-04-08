@@ -12,7 +12,7 @@ const COMMUNITY_AI_QUERY = gql`
   }
 `;
 
-const ChatBox = () => {
+const ChatBox = ({ me }) => {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -21,7 +21,7 @@ const ChatBox = () => {
     },
   ]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState("temp-session-id"); // replace with real token if available
+  const [sessionId, setSessionId] = useState(me.id); // replace with real token if available
 
   const [fetchAIResponse, { loading }] = useLazyQuery(COMMUNITY_AI_QUERY, {
     fetchPolicy: "no-cache", // Don't cache responses for chat

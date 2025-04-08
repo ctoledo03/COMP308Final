@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import '../index.css';
 
-import HelpRequestItem from './HelpRequestItem';
+import HelpRequest from './HelpRequest';
 
 const GET_HELP_REQUESTS = gql`
   query HelpRequests {
@@ -43,30 +43,37 @@ const DELETE_HELP_REQUEST = gql`
   mutation DeleteHelpRequest($id: ID!) {
     deleteHelpRequest(id: $id)
   }
-`;
+`;  
 
 // Main HelpRequest list component
 const HelpRequestList = ({ me }) => {
     const { loading, error, data, refetch } = useQuery(GET_HELP_REQUESTS);
     const [addRequest] = useMutation(ADD_HELP_REQUEST, { 
-        onCompleted: () => refetch() 
+        onCompleted: () => {
+            alert("Help Request Posted")
+            refetch();
+        } 
     });
     const [editRequest] = useMutation(EDIT_HELP_REQUEST, { 
         onCompleted: () => {
+            alert("Post Editing Successful");
             refetch();
             setEditingId(null);
             setForm({ title: '', description: '', location: '' });
         },
         onError: (error) => {
-            alert("You can only edit your own help requests!");
+            alert(error.message);
             setEditingId(null);
             setForm({ title: '', description: '', location: '' });
         }
     });
     const [deleteRequest] = useMutation(DELETE_HELP_REQUEST, { 
-        onCompleted: () => refetch(),
+        onCompleted: () => {
+            alert("Post Deleted Successfully");
+            refetch();
+        },
         onError: (error) => {
-            alert("You can only delete your own help requests!");
+            alert(error.message);
         }
     });
 
@@ -161,7 +168,7 @@ const HelpRequestList = ({ me }) => {
             {/* List of Help Requests */}
             <div className="space-y-4">
                 {data.helpRequests.map((request) => (
-                    <HelpRequestItem
+                    <HelpRequest
                         key={request.id}
                         request={request}
                         onEdit={handleEdit}

@@ -1,7 +1,7 @@
 import CommunityPost from '../models/CommunityPost.js';
 import HelpRequest from '../models/HelpRequest.js';
 import { GraphQLError } from 'graphql';
-import { graph } from "../basicGraph.js";
+import { graph, refreshEmbeddings } from "../basicGraph.js";
 
 const resolvers = {
 	Query: {
@@ -47,7 +47,11 @@ const resolvers = {
 				content,
 				category
 			});
-			return await newPost.save();
+
+			await newPost.save();
+			await refreshEmbeddings();
+
+			return newPost;
 		},
 
 		editCommunityPost: async (_, { id, title, content, category }, { user }) => {
@@ -74,6 +78,7 @@ const resolvers = {
 
 			try {
 				await post.save();
+				await refreshEmbeddings();
 				return true;
 			} catch (error) {
 				console.error('Error saving post:', error);
@@ -99,6 +104,7 @@ const resolvers = {
 			}
 
 			await post.deleteOne();
+			await refreshEmbeddings();
 			return true;
 		},
 
@@ -112,7 +118,11 @@ const resolvers = {
 				location,
 				volunteers: []
 			});
-			return await newRequest.save();
+			
+			await newRequest.save();
+			await refreshEmbeddings();
+
+			return newRequest;
 		},
 
 		editHelpRequest: async (_, { id, title, description, location, isResolved }, { user }) => {
@@ -129,6 +139,7 @@ const resolvers = {
 			request.updatedAt = new Date();
 			
 			await request.save();
+			await refreshEmbeddings();
 			return true;
 		},
 
@@ -140,6 +151,7 @@ const resolvers = {
 			if (request.author.toString() !== user.user._id) throw new GraphQLError('Unauthorized');
 
 			await request.deleteOne();
+			await refreshEmbeddings();
 			return true;
 		},
 
@@ -157,6 +169,7 @@ const resolvers = {
 			// Check if already volunteered
 			if (!request.volunteers.includes(user.user._id)) {
 				request.volunteers.push(user.user._id);
+				await refreshEmbeddings();
 				await request.save();
 			}
 

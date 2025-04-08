@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import '../index.css';
 
@@ -16,7 +15,7 @@ const EDIT_HELP_REQUEST = gql`
 `;
 
 // Individual HelpRequest component
-const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) => {
+const HelpRequest = ({ request, onEdit, onDelete, currentUser, refetch }) => {
     const [volunteer] = useMutation(VOLUNTEER_FOR_REQUEST, {
         onCompleted: () => {
             refetch();
@@ -30,7 +29,7 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
     const [toggleStatus] = useMutation(EDIT_HELP_REQUEST, {
         onCompleted: () => refetch(),
         onError: (error) => {
-            alert("You can only change the status of your own help requests!");
+            alert("You can only change the status of your own help requests! " + error);
         }
     });
 
@@ -56,10 +55,13 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
         try {
             await toggleStatus({
                 variables: {
-                    id: request.id,
-                    isResolved: !request.isResolved
+                  id: request.id,
+                  title: request.title,
+                  description: request.description,
+                  location: request.location,
+                  isResolved: !request.isResolved
                 }
-            });
+              });
         } catch (error) {
             console.error('Error toggling status:', error);
         }
@@ -97,7 +99,7 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
                         </button>
                     )}
                     {currentUser == request.author && (
-                        <div>
+                        <div className="space-x-2">
                             <button
                                 onClick={() => onEdit(request)}
                                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
@@ -118,4 +120,4 @@ const HelpRequestItem = ({ request, onEdit, onDelete, currentUser, refetch }) =>
     );
 };
 
-export default HelpRequestItem
+export default HelpRequest

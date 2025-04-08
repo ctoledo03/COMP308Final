@@ -63,20 +63,22 @@ async function loadAndEmbedDocuments() {
   const communityPosts = await CommunityPost.find({}).lean();
   const helpRequests = await HelpRequest.find({}).lean();
 
-  const formattedCommunityPosts = communityPosts.map(post => 
-    `On a ${post.category} community post this ${post.createdAt}, titled "${post.title}", the author says the following: ${post.content}`
-  );
+  const formattedCommunityPosts = communityPosts.map(post => {
+    const date = new Date(post.createdAt).toLocaleString(); 
+
+    return `On a ${post.category} community post this ${date}, titled "${post.title}", the author says the following: ${post.content}\n`
+  });
   
   const formattedHelpRequests = helpRequests.map(req => {
-    const date = new Date(req.createdAt).toLocaleString(); // Format timestamp to human-readable
+    const date = new Date(req.createdAt).toLocaleString(); 
     const volunteerCount = req.volunteers?.length || 0;
     const status = req.isResolved ? "Resolved" : "Unresolved";
     const location = req.location || "an unspecified location";
   
-    return `On a help request dated at ${date}, the user writes '${req.description}'. The requester is located at ${location} and it has ${volunteerCount} volunteer${volunteerCount !== 1 ? "s" : ""}. It is marked as ${status}.`;
+    return `On a help request dated at ${date}, the user writes '${req.description}'. The requester is located at ${location} and it has ${volunteerCount} volunteer${volunteerCount !== 1 ? "s" : ""}. It is marked as ${status}.\n`;
   });
 
-  const allPosts = [...formattedCommunityPosts, ...formattedHelpRequests]
+  const allPosts = [...formattedCommunityPosts, ...formattedHelpRequests, `Today's date is ${new Date().toISOString().split('T')[0]}`]
 
   embeddedStore = await Promise.all(
     allPosts.map(async (text) => {
@@ -88,7 +90,7 @@ async function loadAndEmbedDocuments() {
   console.log(`✅ Embedded ${embeddedStore.length} sections.`);
 }
 
-await loadAndEmbedDocuments();
+await refreshEmbeddings()
 
 function retrieveRelevantContext(query, topK = 3) {
   return (async () => {
@@ -140,6 +142,10 @@ async function generate(state) {
 
   console.log("✅ Gemini answered:", answer);
   return { ...state, answer, followUp };
+}
+
+export async function refreshEmbeddings() {
+  await loadAndEmbedDocuments();
 }
 
 // Step 6: Create and compile graph
