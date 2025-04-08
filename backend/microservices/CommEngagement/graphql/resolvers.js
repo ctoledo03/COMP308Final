@@ -1,6 +1,7 @@
 import CommunityPost from '../models/CommunityPost.js';
 import HelpRequest from '../models/HelpRequest.js';
 import { GraphQLError } from 'graphql';
+import { graph } from "../basicGraph.js";
 
 const resolvers = {
 	Query: {
@@ -19,6 +20,19 @@ const resolvers = {
 		helpRequests: async (_, { isResolved }) => {
 			const filter = isResolved !== undefined ? { isResolved } : {};
 			return await HelpRequest.find(filter);
+		},
+
+		communityAIQuery: async (_, { question, sessionId }) => {
+			console.log(`Question: ${question}`)
+
+			try {
+				const result = await graph.invoke({ question, sessionId });
+				console.log("✅ Grah result:", result);
+				return result
+			  } catch (err) {
+				console.error("❌ Graph failed:", err.stack);
+				throw new GraphQLError('Error generating response: ' + err);
+			}
 		}
 	},
 

@@ -21,10 +21,18 @@ const typeDefs = `#graphql
 		updatedAt: String
 	}
 
+	type CommunityAIResponse {
+		question: String!
+		sessionId: String!
+		answer: String!
+		followUp: String!
+	}
+
 	type Query {
 		authorized: Boolean!
 		communityPosts(category: String): [CommunityPost!]!  
 		helpRequests(isResolved: Boolean): [HelpRequest!]!  
+		communityAIQuery(question: String!, sessionId: String!): CommunityAIResponse!
 	}
 
 	type Mutation {
