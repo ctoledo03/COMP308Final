@@ -3,7 +3,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import './index.css';
 
 import CommunityPostList from "./components/CommunityPostList";
-import HelpRequest from "./components/HelpRequest";
+import HelpRequestList from "./components/HelpRequestList";
 import ChatBox from "./components/ChatBox";
 
 // Apollo Client Setup
@@ -59,7 +59,7 @@ const App = ({ me }) => {
 
           {/* Main Content */}
           <div className="flex-grow flex justify-center items-center p-6">
-            {selectedPage === "CommunityPost" ? <CommunityPostList me={me} /> : <HelpRequest me={me} />}
+            {selectedPage === "CommunityPost" ? <CommunityPostList me={me} /> : <HelpRequestList me={me} />}
           </div>
 
           <ChatBox />

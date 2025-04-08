@@ -17,7 +17,7 @@ const ChatBox = () => {
     {
       role: "assistant",
       content: "Hi! How can I help you today?",
-      followUp: "What do you need help with?\nWhere are you stuck?",
+      followUp: "What are people talking about?\nWhat do people need help with?",
     },
   ]);
   const [input, setInput] = useState("");

@@ -102,11 +102,12 @@ const resolvers = {
 			return true;
 		},
 
-		addHelpRequest: async (_, { description, location }, { user }) => {
+		addHelpRequest: async (_, { title, description, location }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 			
 			const newRequest = new HelpRequest({
 				author: user.user._id,
+				title,
 				description,
 				location,
 				volunteers: []
@@ -114,13 +115,14 @@ const resolvers = {
 			return await newRequest.save();
 		},
 
-		editHelpRequest: async (_, { id, description, location, isResolved }, { user }) => {
+		editHelpRequest: async (_, { id, title, description, location, isResolved }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 
 			const request = await HelpRequest.findById(id);
 			if (!request) throw new GraphQLError('Help request not found');
 			if (request.author.toString() !== user.user._id) throw new GraphQLError('Unauthorized');
 
+			if (title) request.title = title;
 			if (description) request.description = description;
 			if (location !== undefined) request.location = location;
 			if (isResolved !== undefined) request.isResolved = isResolved;

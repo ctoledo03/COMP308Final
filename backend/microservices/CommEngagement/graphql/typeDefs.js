@@ -13,6 +13,7 @@ const typeDefs = `#graphql
 	type HelpRequest {
 		id: ID!
 		author: ID!
+		title: String!
 		description: String!
 		location: String
 		isResolved: Boolean!
@@ -40,8 +41,8 @@ const typeDefs = `#graphql
 		editCommunityPost(id: ID!, title: String, content: String, category: String): Boolean
 		deleteCommunityPost(id: ID!): Boolean
 
-		addHelpRequest(description: String!, location: String): HelpRequest!
-		editHelpRequest(id: ID!, description: String, location: String, isResolved: Boolean): Boolean
+		addHelpRequest(title: String!, description: String!, location: String): HelpRequest!
+		editHelpRequest(id: ID!, title: String!, description: String, location: String, isResolved: Boolean): Boolean
 		deleteHelpRequest(id: ID!): Boolean
 		volunteer(helpRequestId: ID!): Boolean
 	}
