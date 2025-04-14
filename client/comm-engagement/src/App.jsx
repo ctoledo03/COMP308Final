@@ -65,6 +65,8 @@ const App = ({ me }) => {
     return lastClaimDate === new Date().toDateString();
   });
   const [showDailyReward, setShowDailyReward] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   
   // Track user activity for daily rewards
   useEffect(() => {
@@ -368,7 +370,7 @@ const App = ({ me }) => {
         </div>
 
         {/* Main Content with Animation */}
-        <div className="max-w-6xl mx-auto py-6 px-4 pb-24">
+        <div className={`max-w-6xl mx-auto py-6 px-4 pb-24 transition-all duration-300 ${ isChatOpen ? "mr-80" : "" }`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedPage}
@@ -388,7 +390,28 @@ const App = ({ me }) => {
         </div>
 
         {/* Chat Box */}
-        <ChatBox me={me} />
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsChatOpen(prev => !prev)}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl"
+        >
+          💬
+        </motion.button>
+
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ duration: 0.3 }}
+              className="z-50"
+            >
+              <ChatBox me={me} onClose={() => setIsChatOpen(false)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ApolloProvider>
   );
