@@ -57,7 +57,8 @@ export const resolvers = {
 
 		createCommunityEvent: async (_, args, { user }) => {
 			if (!user) throw new GraphQLError("Not authenticated");
-			return await CommunityEvent.create(args);
+			const event = new CommunityEvent({ ...args, organizer: user.user._id });
+			return await event.save();
 		},
 	},
 

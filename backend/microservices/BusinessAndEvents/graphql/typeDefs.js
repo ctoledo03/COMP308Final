@@ -63,7 +63,7 @@ const typeDefs = `#graphql
     createCommunityEvent(
       title: String!
       description: String
-      organizer: ID!
+      organizer: ID
       location: String
       date: String!
     ): CommunityEvent

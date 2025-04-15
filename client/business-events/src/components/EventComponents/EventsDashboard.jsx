@@ -1,175 +1,185 @@
-import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import React, { useState } from 'react';
+import { useQuery, useMutation, gql, ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+import { motion } from 'framer-motion';
 
-const GET_COMMUNITY_POSTS = gql`
-  query CommunityPosts {
-    communityPosts {
-      id
-      author
-      title
-      content
-      category
-      createdAt
-      updatedAt
-    }
-  }
-`;
+const client = new ApolloClient({
+  uri: "http://localhost:4003/graphql",
+  cache: new InMemoryCache(),
+  credentials: 'include',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-const ADD_COMMUNITY_POST = gql`
-  mutation AddCommunityPost($title: String!, $content: String!, $category: String!) {
-    addCommunityPost(title: $title, content: $content, category: $category) {
+const MY_COMMUNITY_EVENTS = gql`
+  query {
+    myCommunityEvents {
       id
       title
-      content
-      category
-      createdAt
+      description
+      location
+      date
     }
   }
 `;
 
-const EDIT_COMMUNITY_POST = gql`
-  mutation EditCommunityPost($id: ID!, $title: String, $content: String, $category: String) {
-    editCommunityPost(id: $id, title: $title, content: $content, category: $category)
-  }
-`;
-
-const DELETE_COMMUNITY_POST = gql`
-  mutation DeleteCommunityPost($id: ID!) {
-    deleteCommunityPost(id: $id)
-  }
-`;
-
-const CommunityPostList = ({ me }) => {
-  const { loading, error, data, refetch } = useQuery(GET_COMMUNITY_POSTS);
-  const [addPost] = useMutation(ADD_COMMUNITY_POST, { 
-    onCompleted: () => {
-      alert("Community Post Successful")
-      refetch();
-    } 
-  });
-
-  const [editPost] = useMutation(EDIT_COMMUNITY_POST, { 
-    onCompleted: () => {
-      alert("Post Edited Successfully");
-      refetch();
-    },
-    onError: (error) => {
-      alert(error.message);
+const CREATE_COMMUNITY_EVENT = gql`
+  mutation CreateCommunityEvent(
+    $title: String!
+    $description: String
+    $location: String
+    $date: String!
+  ) {
+    createCommunityEvent(
+      title: $title
+      description: $description
+      location: $location
+      date: $date
+    ) {
+      id
+      title
     }
+  }
+`;
+
+const EventsDashboard = ({ me }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    location: '',
+    date: '',
   });
 
-  const [deletePost] = useMutation(DELETE_COMMUNITY_POST, { 
+  const { data, loading, error, refetch } = useQuery(MY_COMMUNITY_EVENTS);
+  const [createEvent, { loading: creating }] = useMutation(CREATE_COMMUNITY_EVENT, {
     onCompleted: () => {
-      alert("Post Deleted Successfully");
+      console.log('Event created successfully');
+      setFormData({ title: '', description: '', location: '', date: '' });
       refetch();
     },
-    onError: (error) => {
-      alert(error.message);
+    onError: (err) => {
+      console.error('Create event error:', err.message);
     }
   });
-
-  const [form, setForm] = useState({ title: '', content: '', category: 'news' });
-  const [editingId, setEditingId] = useState(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    try {
-      if (editingId) {
-        console.log('Submitting edit:', {
-          id: editingId,
-          ...form
-        });
-        await editPost({
-          variables: {
-            id: editingId,
-            title: form.title,
-            content: form.content,
-            category: form.category
-          }
-        });
-        setEditingId(null);
-      } else {
-        await addPost({
-          variables: form
-        });
-      }
-      setForm({ title: '', content: '', category: 'news' });
-    } catch (error) {
-      console.error('Error submitting post:', error);
-    }
+    console.log("Creating event with data:", formData);
+    await createEvent({ variables: formData });
   };
 
-  const handleEdit = (post) => {
-    setEditingId(post.id);
-    setForm({ title: post.title, content: post.content, category: post.category });
+  const logout = () => {
+    window.dispatchEvent(new CustomEvent('logoutSuccess', { detail: { isLoggedIn: false } }));
   };
-
-  const handleDelete = async (id) => {
-    await deletePost({ variables: { id } });
-  };
-
-  if (loading) return <p className="text-white">Loading...</p>;
-  if (error) return <p className="text-white">Error loading posts.</p>;
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 bg-gray-800 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center mb-6 text-white">Community Posts</h1>
+    <ApolloProvider client={client}>
+      <div className="min-h-screen bg-gray-900">
+        <div className="max-w-4xl mx-auto items-center">
+          {/* Navbar */}
+          <div className="flex-grow flex justify-center items-center p-6">
+            <nav className="bg-gray-800 p-4 w-[91%] shadow-lg rounded-lg">
+              <div className="max-w-5xl mx-auto flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-white">Event Hub</h1>
+                <button
+                  className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white"
+                  onClick={logout}
+                >
+                  Logout
+                </button>
+              </div>
+            </nav>
+          </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <textarea
-          name="content"
-          value={form.content}
-          onChange={handleChange}
-          placeholder="Content"
-          required
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="news">News</option>
-          <option value="discussion">Discussion</option>
-        </select>
-        <button
-          type="submit"
-          className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-        >
-          {editingId ? "Update" : "Post"}
-        </button>
-      </form>
+          {/* Main Content */}
+          <div className="flex-grow flex flex-col items-center p-6 space-y-8">
+            {/* Create Event */}
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full bg-gray-800 p-6 rounded-xl shadow text-white"
+            >
+              <h2 className="text-lg font-semibold mb-4">Create New Event</h2>
+              <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4">
+                <input
+                  name="title"
+                  placeholder="Event Title"
+                  className="p-2 border border-gray-600 bg-gray-900 rounded text-white"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+                <textarea
+                  name="description"
+                  placeholder="Event Description"
+                  className="p-2 border border-gray-600 bg-gray-900 rounded text-white"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+                <input
+                  name="location"
+                  placeholder="Location"
+                  className="p-2 border border-gray-600 bg-gray-900 rounded text-white"
+                  value={formData.location}
+                  onChange={handleChange}
+                />
+                <input
+                  name="date"
+                  type="date"
+                  className="p-2 border border-gray-600 bg-gray-900 rounded text-white"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                >
+                  {creating ? 'Creating...' : 'Create Event'}
+                </button>
+              </form>
+            </motion.section>
 
-      {/* List of Posts */}
-      <div className="space-y-4">
-        {data.communityPosts.map((post) => (
-          <CommunityPost
-            key={post.id}
-            post={post}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            currentUser={me.id}
-          />
-        ))}
+            {/* Event List */}
+            <motion.section
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="w-full bg-gray-800 p-6 rounded-xl shadow text-white"
+            >
+              <h2 className="text-lg font-semibold mb-4">My Events</h2>
+              {loading ? (
+                <p>Loading events...</p>
+              ) : error ? (
+                <p className="text-red-400">Error loading events.</p>
+              ) : data.myCommunityEvents.length === 0 ? (
+                <p>No events yet. Create one above!</p>
+              ) : (
+                <ul className="space-y-4">
+                  {data.myCommunityEvents.map((event) => (
+                    <li key={event.id} className="border border-gray-700 p-4 rounded bg-gray-900">
+                      <h3 className="font-bold">{event.title}</h3>
+                      <p>{event.description}</p>
+                      <p className="text-sm text-gray-400">{event.location}</p>
+                      <p className="text-sm text-gray-400">
+                      {new Date(parseInt(event.date)).toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.section>
+          </div>
+        </div>
       </div>
-    </div>
+    </ApolloProvider>
   );
 };
 
-export default CommunityPostList; 
+export default EventsDashboard;
