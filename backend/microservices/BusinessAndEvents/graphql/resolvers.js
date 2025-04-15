@@ -25,8 +25,17 @@ export const resolvers = {
 	
 		myBusinessDeals: async (_, { listingId }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
+		  
+			if (listingId === 'all') {
+			  const listings = await BusinessListing.find({ owner: user.user._id });
+			  const listingIds = listings.map(l => l._id);
+			  const deals = await BusinessDeal.find({ listing: { $in: listingIds } }).populate('listing');
+		  
+			  return deals;
+			}
+		  
 			return await BusinessDeal.find({ listing: listingId }).populate('listing');
-		},
+		}, 
 
 		myCommunityEvents: async (_, __, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
@@ -41,12 +50,12 @@ export const resolvers = {
 			return await listing.save();
 		},
 
-		createBusinessDeal: async (_, args) => {
+		createBusinessDeal: async (_, args, { user }) => {
 			if (!user) throw new GraphQLError("Not authenticated");
 			return await BusinessDeal.create(args);
 		},
 
-		createCommunityEvent: async (_, args) => {
+		createCommunityEvent: async (_, args, { user }) => {
 			if (!user) throw new GraphQLError("Not authenticated");
 			return await CommunityEvent.create(args);
 		},

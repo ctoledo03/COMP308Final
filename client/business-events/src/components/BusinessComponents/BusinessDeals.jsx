@@ -1,175 +1,201 @@
-import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { useQuery, useLazyQuery, useMutation, gql } from '@apollo/client';
 
-const GET_COMMUNITY_POSTS = gql`
-  query CommunityPosts {
-    communityPosts {
+const GET_MY_LISTINGS = gql`
+  query {
+    myBusinessListings {
       id
-      author
-      title
-      content
-      category
-      createdAt
-      updatedAt
+      businessName
     }
   }
 `;
 
-const ADD_COMMUNITY_POST = gql`
-  mutation AddCommunityPost($title: String!, $content: String!, $category: String!) {
-    addCommunityPost(title: $title, content: $content, category: $category) {
+const GET_MY_DEALS = gql`
+  query MyBusinessDeals($listingId: ID!) {
+    myBusinessDeals(listingId: $listingId) {
       id
       title
-      content
-      category
+      details
+      discountPercentage
+      startDate
+      endDate
+      listing {
+        businessName
+      }
       createdAt
     }
   }
 `;
 
-const EDIT_COMMUNITY_POST = gql`
-  mutation EditCommunityPost($id: ID!, $title: String, $content: String, $category: String) {
-    editCommunityPost(id: $id, title: $title, content: $content, category: $category)
+const CREATE_DEAL = gql`
+  mutation CreateBusinessDeal(
+    $listing: ID!
+    $title: String!
+    $details: String
+    $discountPercentage: Float
+    $startDate: String
+    $endDate: String
+  ) {
+    createBusinessDeal(
+      listing: $listing
+      title: $title
+      details: $details
+      discountPercentage: $discountPercentage
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      id
+      title
+    }
   }
 `;
 
-const DELETE_COMMUNITY_POST = gql`
-  mutation DeleteCommunityPost($id: ID!) {
-    deleteCommunityPost(id: $id)
-  }
-`;
+const BusinessDeals = ({ me }) => {
+  const { data: listingsData, loading: listingsLoading } = useQuery(GET_MY_LISTINGS);
+  const [getDeals, { data: dealsData, refetch }] = useLazyQuery(GET_MY_DEALS);
 
-const CommunityPostList = ({ me }) => {
-  const { loading, error, data, refetch } = useQuery(GET_COMMUNITY_POSTS);
-  const [addPost] = useMutation(ADD_COMMUNITY_POST, { 
+  const [createDeal] = useMutation(CREATE_DEAL, {
     onCompleted: () => {
-      alert("Community Post Successful")
-      refetch();
-    } 
-  });
-
-  const [editPost] = useMutation(EDIT_COMMUNITY_POST, { 
-    onCompleted: () => {
-      alert("Post Edited Successfully");
-      refetch();
-    },
-    onError: (error) => {
-      alert(error.message);
+      alert('Deal created!');
+      if (selectedListingId) {
+        getDeals({ variables: { listingId: selectedListingId } });
+      }
     }
   });
 
-  const [deletePost] = useMutation(DELETE_COMMUNITY_POST, { 
-    onCompleted: () => {
-      alert("Post Deleted Successfully");
-      refetch();
-    },
-    onError: (error) => {
-      alert(error.message);
-    }
+  const [selectedListingId, setSelectedListingId] = useState('all');
+  const [form, setForm] = useState({
+    title: '',
+    details: '',
+    discountPercentage: '',
+    startDate: '',
+    endDate: ''
   });
 
-  const [form, setForm] = useState({ title: '', content: '', category: 'news' });
-  const [editingId, setEditingId] = useState(null);
-
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (editingId) {
-        console.log('Submitting edit:', {
-          id: editingId,
-          ...form
-        });
-        await editPost({
-          variables: {
-            id: editingId,
-            title: form.title,
-            content: form.content,
-            category: form.category
-          }
-        });
-        setEditingId(null);
-      } else {
-        await addPost({
-          variables: form
-        });
+    await createDeal({
+      variables: {
+        ...form,
+        listing: selectedListingId,
+        discountPercentage: parseFloat(form.discountPercentage)
       }
-      setForm({ title: '', content: '', category: 'news' });
-    } catch (error) {
-      console.error('Error submitting post:', error);
+    });
+    setForm({
+      title: '',
+      details: '',
+      discountPercentage: '',
+      startDate: '',
+      endDate: ''
+    });
+  };
+
+  const refetchDeals = async () => {
+    if (selectedListingId) {
+      await getDeals({ variables: { listingId: selectedListingId } });
     }
   };
 
-  const handleEdit = (post) => {
-    setEditingId(post.id);
-    setForm({ title: post.title, content: post.content, category: post.category });
-  };
+  useEffect(() => {
+    if (selectedListingId) {
+      getDeals({ variables: { listingId: selectedListingId } });
+    }
+  }, [selectedListingId]);
 
-  const handleDelete = async (id) => {
-    await deletePost({ variables: { id } });
-  };
+  useEffect(() => {
+    console.log("Deals data:", dealsData);
+  }, [dealsData]);
 
-  if (loading) return <p className="text-white">Loading...</p>;
-  if (error) return <p className="text-white">Error loading posts.</p>;
+  if (listingsLoading) return <p className="text-white">Loading...</p>;
+
+  const listings = listingsData?.myBusinessListings || [];
+  const deals = dealsData?.myBusinessDeals || [];
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 bg-gray-800 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center mb-6 text-white">Community Posts</h1>
+    <div className="w-full max-w-3xl mx-auto p-6 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h1 className="text-3xl font-bold text-center mb-6">Business Deals</h1>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <textarea
-          name="content"
-          value={form.content}
-          onChange={handleChange}
-          placeholder="Content"
-          required
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="news">News</option>
-          <option value="discussion">Discussion</option>
-        </select>
-        <button
-          type="submit"
-          className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-        >
-          {editingId ? "Update" : "Post"}
-        </button>
-      </form>
-
-      {/* List of Posts */}
-      <div className="space-y-4">
-        {data.communityPosts.map((post) => (
-          <CommunityPost
-            key={post.id}
-            post={post}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            currentUser={me.id}
-          />
+      <select
+        className="w-full mb-4 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg"
+        value={selectedListingId}
+        onChange={(e) => setSelectedListingId(e.target.value)}
+      >
+        <option value="all">Select a Listing</option>
+        {listings.map((listing) => (
+          <option key={listing.id} value={listing.id}>
+            {listing.businessName}
+          </option>
         ))}
-      </div>
+      </select>
+
+      {selectedListingId && selectedListingId !== 'all' && (
+        <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Title"
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg"
+          />
+          <textarea
+            name="details"
+            value={form.details}
+            onChange={handleChange}
+            placeholder="Details"
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg"
+          />
+          <input
+            type="number"
+            name="discountPercentage"
+            value={form.discountPercentage}
+            onChange={handleChange}
+            placeholder="Discount (%)"
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg"
+          />
+          <input
+            type="date"
+            name="startDate"
+            value={form.startDate}
+            onChange={handleChange}
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg"
+          />
+          <input
+            type="date"
+            name="endDate"
+            value={form.endDate}
+            onChange={handleChange}
+            className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg"
+          />
+          <button
+            type="submit"
+            className="w-full p-3 bg-blue-600 hover:bg-blue-700 font-bold rounded-lg transition"
+          >
+            Create Deal
+          </button>
+        </form>
+      )}
+
+      {deals.length > 0 && (
+        <div className="space-y-4">
+          {deals.map((deal) => (
+            <div key={deal.id} className="p-4 bg-gray-700 rounded-lg border border-gray-600">
+              <h2 className="text-xl font-bold">{deal.listing.businessName}: {deal.title}</h2>
+              <p>{deal.details}</p>
+              <p>{deal.discountPercentage}% off</p>
+              <p className="text-sm text-gray-400">
+                {new Date(parseInt(deal.startDate)).toLocaleDateString()} to{' '}
+                {new Date(parseInt(deal.endDate)).toLocaleDateString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default CommunityPostList; 
+export default BusinessDeals;
