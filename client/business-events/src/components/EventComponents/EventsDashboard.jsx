@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, gql, ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 const client = new ApolloClient({
   uri: "http://localhost:4003/graphql",
@@ -42,7 +43,7 @@ const CREATE_COMMUNITY_EVENT = gql`
   }
 `;
 
-const EventsDashboard = ({ me }) => {
+const EventsDashboard = ({ me, addPoints }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,7 +54,8 @@ const EventsDashboard = ({ me }) => {
   const { data, loading, error, refetch } = useQuery(MY_COMMUNITY_EVENTS);
   const [createEvent, { loading: creating }] = useMutation(CREATE_COMMUNITY_EVENT, {
     onCompleted: () => {
-      console.log('Event created successfully');
+      triggerReward("Event created! +50 points 🎉");
+      addPoints(50);
       setFormData({ title: '', description: '', location: '', date: '' });
       refetch();
     },
@@ -62,14 +64,27 @@ const EventsDashboard = ({ me }) => {
     }
   });
 
+  const [showReward, setShowReward] = useState(false);
+  const [rewardText, setRewardText] = useState('');
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    console.log("Creating event with data:", formData);
     await createEvent({ variables: formData });
+  };
+
+  const triggerReward = (text) => {
+    setRewardText(text);
+    setShowReward(true);
+    setTimeout(() => setShowReward(false), 3000);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
   };
 
   const logout = () => {
@@ -78,7 +93,21 @@ const EventsDashboard = ({ me }) => {
 
   return (
     <ApolloProvider client={client}>
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
+        {/* Reward Animation */}
+        <AnimatePresence>
+          {showReward && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black font-bold py-2 px-4 rounded-full shadow-lg z-50"
+            >
+              {rewardText}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="max-w-4xl mx-auto items-center">
           {/* Navbar */}
           <div className="flex-grow flex justify-center items-center p-6">
@@ -136,13 +165,15 @@ const EventsDashboard = ({ me }) => {
                   onChange={handleChange}
                   required
                 />
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={creating}
                   className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
                 >
                   {creating ? 'Creating...' : 'Create Event'}
-                </button>
+                </motion.button>
               </form>
             </motion.section>
 
@@ -163,14 +194,18 @@ const EventsDashboard = ({ me }) => {
               ) : (
                 <ul className="space-y-4">
                   {data.myCommunityEvents.map((event) => (
-                    <li key={event.id} className="border border-gray-700 p-4 rounded bg-gray-900">
+                    <motion.li
+                      key={event.id}
+                      whileHover={{ scale: 1.02 }}
+                      className="border border-gray-700 p-4 rounded bg-gray-900"
+                    >
                       <h3 className="font-bold">{event.title}</h3>
                       <p>{event.description}</p>
                       <p className="text-sm text-gray-400">{event.location}</p>
                       <p className="text-sm text-gray-400">
-                      {new Date(parseInt(event.date)).toLocaleDateString()}
+                        {new Date(parseInt(event.date)).toLocaleDateString()}
                       </p>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               )}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, gql } from '@apollo/client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 const GET_BUSINESS_LISTINGS = gql`
   query {
@@ -39,11 +40,12 @@ const CREATE_BUSINESS_LISTING = gql`
   }
 `;
 
-const BusinessListings = ({ me }) => {
+const BusinessListings = ({ me, addPoints }) => {
   const { loading, error, data, refetch } = useQuery(GET_BUSINESS_LISTINGS);
   const [addListing] = useMutation(CREATE_BUSINESS_LISTING, {
     onCompleted: () => {
-      alert('Business listing created!');
+      triggerReward("Listing created! +30 points 🎉");
+      addPoints(30);
       refetch();
     },
   });
@@ -55,6 +57,9 @@ const BusinessListings = ({ me }) => {
     phone: '',
     email: '',
   });
+
+  const [showReward, setShowReward] = useState(false);
+  const [rewardText, setRewardText] = useState('');
 
   const handleChange = (e) => {
     setForm({
@@ -77,6 +82,17 @@ const BusinessListings = ({ me }) => {
     });
   };
 
+  const triggerReward = (text) => {
+    setRewardText(text);
+    setShowReward(true);
+    setTimeout(() => setShowReward(false), 3000);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
   if (loading)
     return <p className="text-white text-center mt-8">Loading...</p>;
   if (error)
@@ -89,10 +105,25 @@ const BusinessListings = ({ me }) => {
       transition={{ duration: 0.3 }}
       className="w-full max-w-4xl mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl text-white"
     >
+      {/* Reward Animation */}
+      <AnimatePresence>
+        {showReward && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black font-bold py-2 px-4 rounded-full shadow-lg z-50"
+          >
+            {rewardText}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <h1 className="text-3xl font-bold text-center mb-8 text-blue-400">
         My Business Listings
       </h1>
 
+      {/* Create Listing Form */}
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
@@ -108,14 +139,17 @@ const BusinessListings = ({ me }) => {
             className="bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         ))}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           type="submit"
-          className="md:col-span-2 mt-2 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg font-bold text-lg transition hover:scale-105 active:scale-95"
+          className="md:col-span-2 mt-2 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg font-bold text-lg transition"
         >
           Add Listing
-        </button>
+        </motion.button>
       </form>
 
+      {/* Display Listings */}
       <div className="space-y-4">
         {data.myBusinessListings.map((listing) => (
           <motion.div
