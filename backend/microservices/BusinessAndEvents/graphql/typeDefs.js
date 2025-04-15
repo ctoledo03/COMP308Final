@@ -1,51 +1,73 @@
 const typeDefs = `#graphql
-	type CommunityPost {
-		id: ID!
-		author: ID!
-		title: String!
-		content: String!
-		category: String!
-		aiSummary: String
-		createdAt: String!
-		updatedAt: String
-	}
+  type BusinessListing {
+    id: ID!
+    businessName: String!
+    owner: ID
+    description: String
+    location: String
+    phone: String
+    email: String
+    createdAt: String
+  }
 
-	type HelpRequest {
-		id: ID!
-		author: ID!
-		title: String!
-		description: String!
-		location: String
-		isResolved: Boolean!
-		volunteers: [ID!]
-		createdAt: String!
-		updatedAt: String
-	}
+  type BusinessDeal {
+    id: ID!
+    listing: BusinessListing!
+    title: String!
+    details: String
+    discountPercentage: Float
+    startDate: String
+    endDate: String
+    createdAt: String
+  }
 
-	type CommunityAIResponse {
-		question: String!
-		sessionId: String!
-		answer: String!
-		followUp: String!
-	}
+  type CommunityEvent {
+    id: ID!
+    title: String!
+    description: String
+    organizer: ID!
+    location: String
+    date: String!
+    createdAt: String
+  }
 
-	type Query {
-		authorized: Boolean!
-		communityPosts(category: String): [CommunityPost!]!  
-		helpRequests(isResolved: Boolean): [HelpRequest!]!  
-		communityAIQuery(question: String!, sessionId: String!): CommunityAIResponse!
-	}
+  type Query {
+    authorized: Boolean!
+    businessListings: [BusinessListing]
+    businessDeals: [BusinessDeal]
+    communityEvents: [CommunityEvent]
+    myBusinessListings: [BusinessListing]
+    myBusinessDeals(listingId: ID!): [BusinessDeal]
+    myCommunityEvents: [CommunityEvent]
+  }
 
-	type Mutation {
-		addCommunityPost(title: String!, content: String!, category: String!): CommunityPost!
-		editCommunityPost(id: ID!, title: String, content: String, category: String): Boolean
-		deleteCommunityPost(id: ID!): Boolean
+  type Mutation {
+    createBusinessListing(
+      businessName: String!
+      owner: ID
+      description: String
+      location: String
+      phone: String
+      email: String
+    ): BusinessListing
 
-		addHelpRequest(title: String!, description: String!, location: String): HelpRequest!
-		editHelpRequest(id: ID!, title: String, description: String, location: String, isResolved: Boolean): Boolean
-		deleteHelpRequest(id: ID!): Boolean
-		volunteer(helpRequestId: ID!): Boolean
-	}
+    createBusinessDeal(
+      listing: ID!
+      title: String!
+      details: String
+      discountPercentage: Float
+      startDate: String
+      endDate: String
+    ): BusinessDeal
+
+    createCommunityEvent(
+      title: String!
+      description: String
+      organizer: ID!
+      location: String
+      date: String!
+    ): CommunityEvent
+  }
 `;
 
 export default typeDefs;

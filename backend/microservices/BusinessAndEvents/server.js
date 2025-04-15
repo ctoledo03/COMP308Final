@@ -25,7 +25,7 @@ connectDB();
 // Create an Express app
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:3000','http://localhost:3001', 'http://localhost:3002', 'http://localhost:4000', 'https://studio.apollographql.com'],
+  origin: ['http://localhost:3000','http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:4000', 'https://studio.apollographql.com'],
   credentials: true,
 }));
 // 
@@ -62,7 +62,7 @@ async function startServer() {
     }
   }));
   //
-  app.listen(config.port, () => console.log(`🚀 Product Microservice running at http://localhost:${config.port}/graphql`));
+  app.listen(config.port, () => console.log(`🚀 Business and Events Microservice running at http://localhost:${config.port}/graphql`));
 }
 //
 startServer();

@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 import './index.css';
 
-import CommunityPostList from "./components/CommunityPostList";
-import HelpRequestList from "./components/HelpRequestList";
-import ChatBox from "./components/Chatbox";
+import BusinessDashboard from "./components/BusinessComponents/BusinessDashboard";
+import EventsDashboard from "./components/EventComponents/EventsDashboard";
 
 // Apollo Client Setup
 const client = new ApolloClient({
-  uri: "http://localhost:4002/graphql",
+  uri: "http://localhost:4003/graphql",
   cache: new InMemoryCache(),
   credentials: 'include',
   headers: {
@@ -21,9 +18,9 @@ const client = new ApolloClient({
 const App = ({ me }) => {
   return (
     <ApolloProvider client={client}>
-      <div>Business and events microservice is alive</div>
+      {me?.role === 'business_owner' ? <BusinessDashboard me={me} /> : <EventsDashboard me={me} />}
     </ApolloProvider>
   );
-}
+};
 
 export default App;

@@ -218,10 +218,10 @@ const App = ({ me }) => {
             >
               <div className="flex items-center mb-4">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mr-3">
-                  {me.name ? me.name.charAt(0).toUpperCase() : "U"}
+                  {me.username ? me.username.charAt(0).toUpperCase() : "U"}
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">{me.name || "User"}</h3>
+                  <h3 className="font-bold text-lg">{me.username || "User"}</h3>
                   <p className="text-blue-400 text-sm">{userStats.title}</p>
                 </div>
               </div>
