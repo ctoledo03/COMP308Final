@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLazyQuery, gql } from "@apollo/client";
 
 const COMMUNITY_AI_QUERY = gql`
@@ -12,7 +12,7 @@ const COMMUNITY_AI_QUERY = gql`
   }
 `;
 
-const ChatBox = ({ me }) => {
+const ChatBox = ({ me, onClose }) => {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -21,10 +21,26 @@ const ChatBox = ({ me }) => {
     },
   ]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState(me.id); // replace with real token if available
+  const [sessionId, setSessionId] = useState(me?.id || "guest-session");
+
+  const [points, setPoints] = useState(0);
+  const [streak, setStreak] = useState(1);
+  const [level, setLevel] = useState(1);
+  const [showReward, setShowReward] = useState(false);
+
+  useEffect(() => {
+    if (messages.length > 1) {
+      setPoints(messages.length * 5);
+      setLevel(Math.max(1, Math.floor(messages.length / 3)));
+      if (messages.length % 3 === 0) {
+        setShowReward(true);
+        setTimeout(() => setShowReward(false), 2000);
+      }
+    }
+  }, [messages.length]);
 
   const [fetchAIResponse, { loading }] = useLazyQuery(COMMUNITY_AI_QUERY, {
-    fetchPolicy: "no-cache", // Don't cache responses for chat
+    fetchPolicy: "no-cache",
     onCompleted: (data) => {
       const res = data.communityAIQuery;
       setMessages((prev) => [
@@ -35,7 +51,7 @@ const ChatBox = ({ me }) => {
           followUp: res.followUp,
         },
       ]);
-      setSessionId(res.sessionId); // update sessionId if changed
+      setSessionId(res.sessionId);
     },
     onError: (err) => {
       console.error("AI Query failed:", err.message);
@@ -53,11 +69,9 @@ const ChatBox = ({ me }) => {
     const messageText = text || input;
     if (!messageText.trim()) return;
 
-    // Add user message to chat
     setMessages((prev) => [...prev, { role: "user", content: messageText }]);
     setInput("");
 
-    // Fire the GraphQL query
     fetchAIResponse({
       variables: {
         question: messageText,
@@ -70,14 +84,63 @@ const ChatBox = ({ me }) => {
     sendMessage(question);
   };
 
+  const levelProgress = ((points % 15) / 15) * 100;
+
+  const badges = [];
+  if (level >= 1) badges.push("🌱");
+  if (level >= 2) badges.push("🌟");
+  if (level >= 3) badges.push("🏆");
+  if (level >= 4) badges.push("👑");
+  if (level >= 5) badges.push("🔮");
+
   return (
-    <div className="fixed bottom-4 right-4 w-80 h-[80%] bg-gray-800 rounded-2xl shadow-xl flex flex-col overflow-hidden border border-gray-700 z-50">
-      {/* Header */}
-      <div className="bg-gray-700 text-white text-lg font-semibold px-4 py-2">
-        Agentic AI Chat
+    <div className="fixed bottom-4 right-4 w-80 h-[86%] bg-gray-800 rounded-2xl shadow-xl flex flex-col overflow-hidden border border-gray-700 z-50">
+      {/* Collapse Button */}
+      <div className="w-full bg-gray-900 text-white py-1 cursor-pointer hover:bg-gray-800 flex justify-center" onClick={onClose}>
+        <span className="text-xl">▼</span>
       </div>
 
-      {/* Chat Messages */}
+      {/* Header */}
+      <div className="bg-gray-700 text-white px-4 py-2 relative">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Agentic AI Chat</h3>
+          <div className="flex items-center space-x-2">
+            <span className="bg-blue-600 text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+              {level}
+            </span>
+            <span className="text-yellow-400 text-xs font-semibold">{points} pts</span>
+          </div>
+        </div>
+
+        <div className="w-full bg-gray-600 h-1.5 rounded-full mt-1 overflow-hidden">
+          <div
+            className="bg-blue-500 h-1.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${levelProgress}%` }}
+          />
+        </div>
+
+        {badges.length > 0 && (
+          <div className="flex gap-1 mt-1">
+            {badges.map((badge, idx) => (
+              <span key={idx} className="text-sm" title={`Level ${idx + 1} badge`}>
+                {badge}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="absolute top-2 right-2 bg-orange-600 text-white text-xs rounded-full px-2 py-0.5 flex items-center">
+          🔥 {streak}
+        </div>
+      </div>
+
+      {showReward && (
+        <div className="absolute top-14 left-0 right-0 mx-auto w-max bg-yellow-500 text-black font-bold py-1 px-3 rounded-full shadow-lg animate-bounce z-10">
+          +5 points! 🎉
+        </div>
+      )}
+
+      {/* Messages */}
       <div className="flex-1 p-3 overflow-y-auto space-y-4 bg-gray-900">
         {messages.map((msg, idx) => (
           <div key={idx} className="space-y-1">
@@ -89,19 +152,26 @@ const ChatBox = ({ me }) => {
               }`}
             >
               {msg.content}
+              {msg.role === "user" && (
+                <span className="text-xs text-blue-300 block mt-1">+5 pts</span>
+              )}
             </div>
 
             {msg.role === "assistant" && msg.followUp && (
               <div className="flex flex-col gap-1 ml-2">
-                {msg.followUp.split("\n").filter(q => q.trim() !== "").map((question, i) => (
-                  <button
-                    key={i}
-                    className="text-xs text-blue-400 hover:underline text-left"
-                    onClick={() => handleFollowUpClick(question.trim())}
-                  >
-                    ➤ {question}
-                  </button>
-                ))}
+                {msg.followUp
+                  .split("\n")
+                  .filter((q) => q.trim() !== "")
+                  .map((question, i) => (
+                    <button
+                      key={i}
+                      className="text-xs text-blue-400 hover:underline text-left group"
+                      onClick={() => handleFollowUpClick(question.trim())}
+                    >
+                      <span className="group-hover:scale-110 transition-transform inline-block">➤</span>{" "}
+                      {question}
+                    </button>
+                  ))}
               </div>
             )}
           </div>
@@ -109,11 +179,12 @@ const ChatBox = ({ me }) => {
 
         {loading && (
           <div className="text-sm text-gray-400 animate-pulse">
-            Agent is thinking...
+            Agent is thinking... <span className="text-xs text-yellow-400">+5 pts coming</span>
           </div>
         )}
       </div>
 
+      {/* Input */}
       <div className="p-2 border-t border-gray-700 flex bg-gray-800">
         <input
           type="text"
@@ -125,7 +196,7 @@ const ChatBox = ({ me }) => {
         />
         <button
           onClick={() => sendMessage()}
-          className="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+          className="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 hover:scale-105 active:scale-95 transition-transform text-sm"
           disabled={loading}
         >
           {loading ? "..." : "Send"}

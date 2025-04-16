@@ -5,6 +5,7 @@ import './App.css';
 
 const UserAuth = lazy(() => import('userAuth/App'));
 const CommEngagementApp = lazy(() => import('commEngagement/App'));
+const BusinessAndEventsApp = lazy(() => import('businessAndEvents/App'))
 
 // GraphQL query to check the current user's authentication status
 const CURRENT_USER_QUERY = gql`
@@ -12,6 +13,7 @@ const CURRENT_USER_QUERY = gql`
     me {
       id
       username
+      role
     }
   }
 `;
@@ -25,6 +27,8 @@ const LOGOUT_MUTATION = gql`
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [content, setContent] = useState(null)
+
   const [logout] = useMutation(LOGOUT_MUTATION, {
     onCompleted: () => {
       console.log("✅ Logged out successfully");
@@ -35,35 +39,69 @@ function App() {
   });
 
   // Use Apollo's useQuery hook to perform the authentication status check on app load
-  const { loading, error, data } = useQuery(CURRENT_USER_QUERY, {
+  const { loading, error, data, refetch } = useQuery(CURRENT_USER_QUERY, {
     fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    // Listen for the custom loginSuccess event from the UserApp
-    const handleLoginSuccess = (event) => {
+    if (!isLoggedIn) {
+      setContent(<UserAuth />);
+    }
+  
+    const handleLoginSuccess = async (event) => {
       setIsLoggedIn(event.detail.isLoggedIn);
+      const { data: freshData } = await refetch();
+      const user = freshData?.me; 
+  
+      if (user?.role === "resident") {
+        setContent(<CommEngagementApp me={user} />);
+      } else {
+        setContent(<BusinessAndEventsApp me={user} />);
+      }
+  
       console.log('✅ Received loginSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
-
+  
     const handleLogoutSuccess = (event) => {
       setIsLoggedIn(event.detail.isLoggedIn);
       logout();
+      setContent(<UserAuth />);
       console.log('✅ Received logoutSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
 
+    const handleSwitchView = async (event) => {
+      const requestedView = event.detail.requestedView
+
+      if (requestedView == "community") {
+        setContent(<CommEngagementApp me={data.me} />);
+      }
+      else if (requestedView == "businessAndEvents" && (data.me.role != 'resident')) {
+        setContent(<BusinessAndEventsApp me={data.me} />);
+      }
+    }
+  
     window.addEventListener('loginSuccess', handleLoginSuccess);
     window.addEventListener('logoutSuccess', handleLogoutSuccess);
-
-    // Check the authentication status based on the query's result
+    window.addEventListener('requestSwitchView', handleSwitchView);
+  
     if (!loading && !error) {
       setIsLoggedIn(!!data.me);
+  
+      if (data?.me) {
+        if (data.me.role === "resident") {
+          setContent(<CommEngagementApp me={data.me} />);
+        } else {
+          setContent(<BusinessAndEventsApp me={data.me} />);
+        }
+      }
     }
-
+  
     return () => {
       window.removeEventListener('loginSuccess', handleLoginSuccess);
+      window.removeEventListener('logoutSuccess', handleLogoutSuccess);
     };
   }, [loading, error, data]);
+  
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error! {error.message}</div>;
@@ -71,7 +109,7 @@ function App() {
   return (
     <div className="App">
       <Suspense fallback={<div>Loading...</div>}>
-        {!isLoggedIn ? <UserAuth /> : <CommEngagementApp me={data.me} />}
+         {!isLoggedIn ? <UserAuth /> : content}
       </Suspense>
     </div>
   );

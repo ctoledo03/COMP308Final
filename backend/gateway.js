@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS and Cookie Parsing
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
   credentials: true,
 }));
 app.use(cookieParser());
@@ -29,6 +29,7 @@ const gateway = new ApolloGateway({
     subgraphs: [
       { name: 'auth', url: 'http://localhost:4001/graphql' },
       { name: 'community', url: 'http://localhost:4002/graphql' },
+      { name: 'businessAndEvents', url: 'http://localhost:4003/graphql' },
     ],
   }),
 });
