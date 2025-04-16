@@ -28,6 +28,7 @@ const LOGOUT_MUTATION = gql`
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [content, setContent] = useState(null)
+
   const [logout] = useMutation(LOGOUT_MUTATION, {
     onCompleted: () => {
       console.log("✅ Logged out successfully");
@@ -67,9 +68,21 @@ function App() {
       setContent(<UserAuth />);
       console.log('✅ Received logoutSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
+
+    const handleSwitchView = async (event) => {
+      const requestedView = event.detail.requestedView
+
+      if (requestedView == "community") {
+        setContent(<CommEngagementApp me={data.me} />);
+      }
+      else if (requestedView == "businessAndEvents" && (data.me.role != 'resident')) {
+        setContent(<BusinessAndEventsApp me={data.me} />);
+      }
+    }
   
     window.addEventListener('loginSuccess', handleLoginSuccess);
     window.addEventListener('logoutSuccess', handleLogoutSuccess);
+    window.addEventListener('requestSwitchView', handleSwitchView);
   
     if (!loading && !error) {
       setIsLoggedIn(!!data.me);

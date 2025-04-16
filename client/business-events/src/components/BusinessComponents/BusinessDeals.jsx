@@ -24,7 +24,14 @@ const GET_MY_DEALS = gql`
       listing {
         businessName
       }
+      comments {
+        text
+        author
+        createdAt
+      }
       createdAt
+      summary
+      sentiment
     }
   }
 `;
@@ -52,9 +59,17 @@ const CREATE_DEAL = gql`
   }
 `;
 
-const BusinessDeals = ({ me, addPoints }) => {
+const BusinessDeals = ({ me, addPoints, userStats }) => {
   const { data: listingsData, loading: listingsLoading } = useQuery(GET_MY_LISTINGS);
   const [getDeals, { data: dealsData, refetch }] = useLazyQuery(GET_MY_DEALS);
+  const [visibleComments, setVisibleComments] = useState({});
+
+  const toggleComments = (dealId) => {
+    setVisibleComments((prev) => ({
+      ...prev,
+      [dealId]: !prev[dealId],
+    }));
+  };  
 
   const [createDeal] = useMutation(CREATE_DEAL, {
     onCompleted: () => {
@@ -129,6 +144,37 @@ const BusinessDeals = ({ me, addPoints }) => {
 
   return (
     <div className="w-full max-w-3xl mx-auto p-6 bg-gray-800 rounded-lg shadow-lg text-white">
+      {/* User Stats Bar */}
+      <div className="bg-gray-700 p-4 rounded-lg mb-6 flex items-center">
+        <div className="flex items-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
+            {userStats.icon}
+          </div>
+          <div className="ml-3">
+            <p className="text-white font-bold">{userStats.title}</p>
+            <p className="text-sm text-gray-300">Level {userStats.level}</p>
+          </div>
+        </div>
+        <div className="flex-1 mx-6">
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <span>{userStats.points} pts</span>
+            <span>{userStats.nextLevelPoints} pts</span>
+          </div>
+          <div className="w-full bg-gray-600 h-2 rounded-full">
+            <motion.div
+              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${userStats.progress}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
+        <div className="text-yellow-400">
+          <span className="mr-1">🌟</span>
+          <span className="font-bold">{userStats.points} pts</span>
+        </div>
+      </div>
+
       {/* Reward Animation */}
       <AnimatePresence>
         {showReward && (
@@ -221,13 +267,50 @@ const BusinessDeals = ({ me, addPoints }) => {
               exit={{ opacity: 0, y: -20 }}
               className="p-4 bg-gray-700 rounded-lg border border-gray-600"
             >
-              <h2 className="text-xl font-bold">{deal.listing.businessName}: {deal.title}</h2>
+              <h2 className="text-xl font-bold">
+                {deal.listing.businessName}: {deal.title}
+              </h2>
               <p>{deal.details}</p>
               <p>{deal.discountPercentage}% off</p>
               <p className="text-sm text-gray-400">
                 {new Date(parseInt(deal.startDate)).toLocaleDateString()} to{' '}
                 {new Date(parseInt(deal.endDate)).toLocaleDateString()}
               </p>
+            
+              {/* Comments Toggle */}
+              <button
+                onClick={() => toggleComments(deal.id)}
+                className="mt-2 text-sm text-blue-400 hover:underline"
+              >
+                {visibleComments[deal.id] ? 'Hide Comments' : 'View Comments'}
+              </button>
+
+              {/* AI Summary & Sentiment */}
+              {deal.summary && deal.sentiment && (
+                <div className="text-sm text-gray-300 mt-2 italic">
+                  <p><span className="font-bold text-white">Summary:</span> {deal.summary}</p>
+                  <p><span className="font-bold text-white">Sentiment:</span> {deal.sentiment}</p>
+                </div>
+              )}
+                          
+              {/* Comments List */}
+              {visibleComments[deal.id] && (
+                <div className="mt-3 space-y-2 border-t border-gray-600 pt-2">
+                  {deal.comments.length === 0 ? (
+                    <p className="text-gray-400 italic text-sm">No comments yet.</p>
+                  ) : (
+                    deal.comments.map((comment, index) => (
+                      <div key={index} className="text-sm bg-gray-600 p-2 rounded">
+                        <p className="text-white">{comment.text}</p>
+                        <p className="text-xs text-gray-300 mt-1">
+                          - {comment.author} on{' '}
+                          {new Date(parseInt(comment.createdAt)).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </motion.div>
           ))}
         </div>

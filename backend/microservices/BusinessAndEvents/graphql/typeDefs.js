@@ -1,4 +1,10 @@
 const typeDefs = `#graphql
+  type Comment {
+    text: String!
+    author: ID!
+    createdAt: String
+  }
+
   type BusinessListing {
     id: ID!
     businessName: String!
@@ -19,6 +25,9 @@ const typeDefs = `#graphql
     startDate: String
     endDate: String
     createdAt: String
+    comments: [Comment]
+    summary: String
+    sentiment: String
   }
 
   type CommunityEvent {
@@ -29,6 +38,15 @@ const typeDefs = `#graphql
     location: String
     date: String!
     createdAt: String
+  }
+
+  type CommentInsights {
+    summary: String
+    sentiment: String
+  }
+
+  extend type BusinessDeal {
+    commentInsights: CommentInsights
   }
 
   type Query {
@@ -67,6 +85,12 @@ const typeDefs = `#graphql
       location: String
       date: String!
     ): CommunityEvent
+
+    addCommentToDeal(
+      dealId: ID!
+      text: String!
+      username: String!
+    ): BusinessDeal
   }
 `;
 

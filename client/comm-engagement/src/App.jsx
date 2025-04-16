@@ -6,6 +6,8 @@ import './index.css';
 
 import CommunityPostList from "./components/CommunityPostList";
 import HelpRequestList from "./components/HelpRequestList";
+import BusinessDeals from "./components/BusinessDeals";
+import CommunityEvents from "./components/CommunityEvents"
 import ChatBox from "./components/Chatbox";
 
 // Apollo Client Setup
@@ -102,10 +104,15 @@ const App = ({ me }) => {
   useEffect(() => {
     // Add notification based on page change
     if (selectedPage === "CommunityPost") {
-      addNotification("Community Posts loaded! 📝");
-    } else {
-      addNotification("Help Requests loaded! 🤝");
+      addNotification("Community Posts loaded!");
+    } else if (selectedPage === "HelpRequest") {
+      addNotification("Help Requests loaded!");
+    } else if (selectedPage === "BusinessDeals") {
+      addNotification("Business Deals Loaded!");
+    } else if (selectedPage === "CommunityEvents") {
+      addNotification("Community Events loaded!");
     }
+    
   }, [selectedPage]);
   
   const addNotification = (message) => {
@@ -147,6 +154,10 @@ const App = ({ me }) => {
 
   const logout = () => {
     window.dispatchEvent(new CustomEvent('logoutSuccess', { detail: { isLoggedIn: false } })); 
+  }
+
+  const handleSwitchView = () => {
+    window.dispatchEvent(new CustomEvent('requestSwitchView', { detail: { requestedView: 'businessAndEvents' } }));
   }
 
   return (
@@ -258,6 +269,15 @@ const App = ({ me }) => {
               >
                 Close
               </button>
+
+              {me?.role !== 'resident' && (
+                <button 
+                  onClick={() => handleSwitchView()}
+                  className="w-full py-2 mt-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition"
+                >
+                  Business/Events View
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -268,7 +288,7 @@ const App = ({ me }) => {
           animate={{ y: 0 }}
           className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 shadow-xl border-b border-gray-700 sticky top-0 z-30"
         >
-          <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <motion.div 
                 whileHover={{ rotate: [0, -10, 10, -10, 0] }}
@@ -303,6 +323,32 @@ const App = ({ me }) => {
                   onClick={() => setSelectedPage("HelpRequest")}
                 >
                   <span className="mr-2">🤝</span> Help Requests
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+                    selectedPage === "CommunityPost" 
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg" 
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => setSelectedPage("BusinessDeals")}
+                >
+                  <span className="mr-2">🏷️</span> Business Deals
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+                    selectedPage === "CommunityPost" 
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg" 
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => setSelectedPage("CommunityEvents")}
+                >
+                  <span className="mr-2">📅</span> Community Events
                 </motion.button>
               </div>
             </div>
@@ -382,9 +428,13 @@ const App = ({ me }) => {
             >
               {selectedPage === "CommunityPost" ? (
                 <CommunityPostList me={me} />
-              ) : (
+              ) : selectedPage === "HelpRequest" ? (
                 <HelpRequestList me={me} />
-              )}
+              ) : selectedPage === "BusinessDeals" ? (
+                <BusinessDeals me={me} />
+              ) : selectedPage === "CommunityEvents" ? (
+                <CommunityEvents me={me} />
+              ) : null}
             </motion.div>
           </AnimatePresence>
         </div>

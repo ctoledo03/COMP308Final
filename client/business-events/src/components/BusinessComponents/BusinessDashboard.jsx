@@ -47,6 +47,8 @@ const BusinessDashboard = ({ me }) => {
   const [userStats, setUserStats] = useState(calculateUserStats());
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [showUserCard, setShowUserCard] = useState(false);
+  
 
   useEffect(() => {
     // Update stats periodically
@@ -87,6 +89,10 @@ const BusinessDashboard = ({ me }) => {
       setNotifications(prev => prev.filter(notif => notif.id !== id));
     }, 4000);
   };
+
+  const handleSwitchView = () => {
+    window.dispatchEvent(new CustomEvent('requestSwitchView', { detail: { requestedView: 'community' } }));
+  }
 
   const logout = () => {
     window.dispatchEvent(new CustomEvent('logoutSuccess', { detail: { isLoggedIn: false } }));
@@ -131,76 +137,152 @@ const BusinessDashboard = ({ me }) => {
           )}
         </AnimatePresence>
 
+        {/* User Profile Card */}
+        <AnimatePresence>
+          {showUserCard && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed top-20 right-4 z-40 bg-gray-800 rounded-xl p-5 shadow-xl border border-blue-600 w-80"
+            >
+              <div className="flex items-center mb-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mr-3">
+                  {me.username ? me.username.charAt(0).toUpperCase() : "U"}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{me.username || "User"}</h3>
+                  <p className="text-blue-400 text-sm">{userStats.title}</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Level {userStats.level}</span>
+                  <span>{userStats.totalPoints}/{userStats.nextLevelPoints} points</span>
+                </div>
+                <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${userStats.progress}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <div className="bg-gray-700 rounded-lg p-3 text-center">
+                  <p className="text-lg font-bold text-yellow-400">{userStats.totalPoints}</p>
+                  <p className="text-xs text-gray-300">Total Points</p>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-3 text-center">
+                  <p className="text-lg font-bold text-green-400">{userStats.achievements}</p>
+                  <p className="text-xs text-gray-300">Achievements</p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setShowUserCard(false)}
+                className="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition"
+              >
+                Close
+              </button>
+
+              <button 
+                onClick={() => handleSwitchView()}
+                className="w-full py-2 mt-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition"
+              >
+                Community View
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Navbar */}
-        <nav className="bg-gray-800 p-4 shadow-lg rounded-lg mb-6">
-          <div className="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-white">Business Hub</h1>
-            <div className="space-x-4">
-              <button
-                className={`px-4 py-2 rounded text-white ${selectedPage === "BusinessListings" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
-                onClick={() => {
-                  setSelectedPage("BusinessListings");
-                  addNotification("Business Listings loaded! 📋");
-                }}
+        <motion.nav 
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 shadow-xl border-b border-gray-700 sticky top-0 z-30"
+        >
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <motion.div 
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
+                className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500"
               >
-                Business Listings
-              </button>
-              <button
-                className={`px-4 py-2 rounded text-white ${selectedPage === "BusinessDeals" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
-                onClick={() => {
-                  setSelectedPage("BusinessDeals");
-                  addNotification("Business Deals loaded! 💼");
-                }}
+                Business Hub
+              </motion.div>
+              
+              <div className="hidden md:flex space-x-1">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+                    selectedPage === "CommunityPost" 
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg" 
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => setSelectedPage("BusinessListings")}
+                >
+                  <span className="mr-2">📝</span> Business Listings
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+                    selectedPage === "HelpRequest" 
+                      ? "bg-gradient-to-r from-purple-600 to-purple-700 shadow-lg" 
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => setSelectedPage("BusinessDeals")}
+                >
+                  <span className="mr-2">🏷️</span> Business Deals
+                </motion.button>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              {/* User Stats Overview */}
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                onClick={() => setShowUserCard(!showUserCard)}
+                className="flex items-center bg-gray-700 rounded-full px-3 py-1 cursor-pointer"
               >
-                Business Deals
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white"
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-2">
+                  {userStats.level}
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-xs">{userStats.title}</p>
+                  <p className="text-xs text-yellow-400 font-medium">{userStats.totalPoints} pts</p>
+                </div>
+                <div className="ml-2 text-xs">
+                  <span className="text-yellow-400">
+                    {showUserCard ? "▲" : "▼"}
+                  </span>
+                </div>
+              </motion.div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }} 
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition shadow-lg"
                 onClick={logout}
               >
                 Logout
-              </button>
+              </motion.button>
             </div>
           </div>
-        </nav>
-
-        {/* User Stats Bar */}
-        <div className="bg-gray-700 p-4 rounded-lg mb-6 flex items-center">
-          <div className="flex items-center">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
-              {userStats.icon}
-            </div>
-            <div className="ml-3">
-              <p className="text-white font-bold">{userStats.title}</p>
-              <p className="text-sm text-gray-300">Level {userStats.level}</p>
-            </div>
-          </div>
-          <div className="flex-1 mx-6">
-            <div className="flex justify-between text-xs text-gray-400 mb-1">
-              <span>{userStats.points} pts</span>
-              <span>{userStats.nextLevelPoints} pts</span>
-            </div>
-            <div className="w-full bg-gray-600 h-2 rounded-full">
-              <motion.div
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${userStats.progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-          <div className="text-yellow-400">
-            <span className="mr-1">🌟</span>
-            <span className="font-bold">{userStats.points} pts</span>
-          </div>
-        </div>
+        </motion.nav>
 
         {/* Main Content */}
         <div className="flex-grow flex justify-center items-center p-6">
           {selectedPage === "BusinessListings" ? (
-            <BusinessListings me={me} addPoints={addPoints} />
+            <BusinessListings me={me} addPoints={addPoints} userStats={userStats} />
           ) : (
-            <BusinessDeals me={me} addPoints={addPoints} />
+            <BusinessDeals me={me} addPoints={addPoints} userStats={userStats}/>
           )}
         </div>
       </div>

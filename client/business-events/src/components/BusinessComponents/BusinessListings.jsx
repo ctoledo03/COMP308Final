@@ -40,7 +40,7 @@ const CREATE_BUSINESS_LISTING = gql`
   }
 `;
 
-const BusinessListings = ({ me, addPoints }) => {
+const BusinessListings = ({ me, addPoints, userStats }) => {
   const { loading, error, data, refetch } = useQuery(GET_BUSINESS_LISTINGS);
   const [addListing] = useMutation(CREATE_BUSINESS_LISTING, {
     onCompleted: () => {
@@ -105,6 +105,36 @@ const BusinessListings = ({ me, addPoints }) => {
       transition={{ duration: 0.3 }}
       className="w-full max-w-4xl mx-auto p-6 bg-gray-800 rounded-2xl shadow-2xl text-white"
     >
+              {/* User Stats Bar */}
+              <div className="bg-gray-700 p-4 rounded-lg mb-6 flex items-center">
+          <div className="flex items-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
+              {userStats.icon}
+            </div>
+            <div className="ml-3">
+              <p className="text-white font-bold">{userStats.title}</p>
+              <p className="text-sm text-gray-300">Level {userStats.level}</p>
+            </div>
+          </div>
+          <div className="flex-1 mx-6">
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>{userStats.points} pts</span>
+              <span>{userStats.nextLevelPoints} pts</span>
+            </div>
+            <div className="w-full bg-gray-600 h-2 rounded-full">
+              <motion.div
+                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${userStats.progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+          <div className="text-yellow-400">
+            <span className="mr-1">🌟</span>
+            <span className="font-bold">{userStats.points} pts</span>
+          </div>
+        </div>
       {/* Reward Animation */}
       <AnimatePresence>
         {showReward && (
