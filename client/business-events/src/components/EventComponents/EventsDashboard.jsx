@@ -80,7 +80,6 @@ const EventsDashboard = ({ me }) => {
   const { data, loading, error, refetch } = useQuery(MY_COMMUNITY_EVENTS);
   const [createEvent, { loading: creating }] = useMutation(CREATE_COMMUNITY_EVENT, {
     onCompleted: () => {
-      triggerReward("Event created! +50 points 🎉");
       addPoints(50);
       setFormData({ title: '', description: '', location: '', date: '' });
       refetch();
