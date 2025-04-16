@@ -87,6 +87,12 @@ const CommunityPost = ({ post, onEdit, onDelete, currentUser }) => {
                 </div>
             )}
 
+            {post.aiSummary && (
+                    <div className="text-sm text-gray-300 mt-2 italic">
+                    <p><span className="font-bold text-white">Summary:</span> {post.aiSummary}</p>
+                    </div>
+            )}
+
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-400">Category: </span>
@@ -113,7 +119,8 @@ const CommunityPost = ({ post, onEdit, onDelete, currentUser }) => {
                     </div>
                 )}
             </div>
-            
+        
+
             {/* User contribution badge */}
             {post.author && (
                 <div className="absolute top-6 right-6 flex items-center space-x-1">

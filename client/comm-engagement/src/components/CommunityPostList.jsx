@@ -14,6 +14,7 @@ const GET_COMMUNITY_POSTS = gql`
       category
       createdAt
       updatedAt
+      aiSummary
     }
   }
 `;

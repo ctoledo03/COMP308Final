@@ -2,6 +2,7 @@ import CommunityPost from '../models/CommunityPost.js';
 import HelpRequest from '../models/HelpRequest.js';
 import { GraphQLError } from 'graphql';
 import { graph, refreshEmbeddings } from "../basicGraph.js";
+import { summarizePost } from '../utils/AIContentSummarization.js';
 
 const resolvers = {
 	Query: {
@@ -14,7 +15,27 @@ const resolvers = {
 
 		communityPosts: async (_, { category }) => {
 			const filter = category ? { category } : {};
-			return await CommunityPost.find(filter);
+			const posts = await CommunityPost.find(filter);
+		  
+			const enrichedPosts = await Promise.all(
+			  posts.map(async (post) => {
+				if (
+				  post.content.split(' ').length > 50 &&
+				  !post.aiSummary
+				) {
+				  const summary = await summarizePost(post.content);
+		  
+				  if (summary) {
+					post.aiSummary = summary;
+					await post.save(); // persist it so next time it's already there
+				  }
+				}
+		  
+				return post;
+			  })
+			);
+		  
+			return enrichedPosts;
 		},
 
 		helpRequests: async (_, { isResolved }) => {
@@ -40,11 +61,13 @@ const resolvers = {
 		addCommunityPost: async (_, { title, content, category }, { user }) => {
 			if (!user) throw new GraphQLError('You must be logged in');
 			console.log('Creating post with user:', user);
+			const aiSummary = await summarizePost(content);
 
 			const newPost = new CommunityPost({
 				author: user.user._id,
 				title,
 				content,
+				aiSummary,
 				category
 			});
 
