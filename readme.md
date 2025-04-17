@@ -70,7 +70,7 @@ The platform is built using a microservices and micro-frontends architecture:
 
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/community-engagement.git
+   git clone https://github.com/ctoledocarlo/community-engagement.git
    cd community-engagement
    ```
 
