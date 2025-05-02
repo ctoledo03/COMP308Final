@@ -23,9 +23,17 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:3000','http://localhost:3001', 'http://localhost:3002', 'http://localhost:4000', 'https://studio.apollographql.com'],
+  origin: ['https://communityengagement.onrender.com','https://communityengagement-clientuserauth.onrender.com', 'http://localhost:3002', 'http://localhost:4000', 'https://studio.apollographql.com'],
   credentials: true,
 }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://communityengagement.onrender.com'); 
+  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 app.use(cookieParser());
 app.use(bodyParser.json());
