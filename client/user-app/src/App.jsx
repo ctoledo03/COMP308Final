@@ -8,6 +8,7 @@ const client = new ApolloClient({
   uri: 'http://localhost:4001/graphql', // Set this to your actual GraphQL endpoint
   cache: new InMemoryCache(),
   credentials: 'include'
+  // force redeploy
 });
 
 function App() {
