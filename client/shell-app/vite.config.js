@@ -16,4 +16,7 @@ export default defineConfig({
       shared: ['react', 'react-dom', '@apollo/client', 'graphql'],
     }),
   ],
+  build: {
+    target: 'es2022' 
+  }
 });
