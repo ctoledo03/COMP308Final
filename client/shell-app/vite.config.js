@@ -9,7 +9,7 @@ export default defineConfig({
     federation({
       name: 'shellApp',
       remotes: {
-        userAuth: 'http://localhost:3001/assets/remoteEntry.js',
+        userAuth: 'https://communityengagement-clientuserauth.onrender.com/assets/remoteEntry.js',
         commEngagement: 'http://localhost:3002/assets/remoteEntry.js',
         businessAndEvents: 'http://localhost:3003/assets/remoteEntry.js'
       },
