@@ -30,14 +30,6 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://communityengagement.onrender.com'); 
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 app.use(cookieParser());
 app.use(bodyParser.json());
