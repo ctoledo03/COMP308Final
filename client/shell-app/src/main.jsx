@@ -7,7 +7,7 @@ import './index.css';
 
 // Set up the Apollo Client
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4001/graphql', // Adjust to your auth-microservice GraphQL endpoint
+  uri: 'https://communityengagement-gateway.onrender.com/graphql', // Adjust to your auth-microservice GraphQL endpoint
   credentials: 'include', // Important for handling cookies properly
 });
 
