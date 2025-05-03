@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, gql, ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { GraphQLError } from 'graphql';
 
 const client = new ApolloClient({
   uri: "https://communityengagement-qdh2.onrender.com/graphql",
