@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { GraphQLError } from 'graphql';
 
 const GET_BUSINESS_LISTINGS = gql`
   query {

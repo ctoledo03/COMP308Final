@@ -3,7 +3,7 @@ import { BusinessListing } from '../models/BusinessListing.js';
 import { BusinessDeal } from '../models/BusinessDeal.js';
 import { CommunityEvent } from '../models/CommunityEvent.js';
 import { analyzeComments } from '../utils/AICommentAnalysis.js';
-
+import { GraphQLError } from 'graphql';
 
 export const resolvers = {
 	Query: {
