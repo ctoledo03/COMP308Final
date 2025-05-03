@@ -38,8 +38,13 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Credentials', 'true');
+
+  console.log('Cookies:', req.cookies);
+  console.log('Authorization:', req.headers.authorization);
+  
   next();
 });
+
 
 app.use(cookieParser());
 app.use(bodyParser.json());
