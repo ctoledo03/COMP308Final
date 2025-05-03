@@ -88,9 +88,6 @@ export const resolvers = {
 
 			deal.summary = summary;
 			deal.sentiment = sentiment;
-
-			console.log("Deal summary/sentiment", deal.summary, deal.sentiment);
-
 			deal.comments.push(comment);
 			await deal.save();
 

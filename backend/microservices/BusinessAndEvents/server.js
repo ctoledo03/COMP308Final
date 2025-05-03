@@ -17,8 +17,6 @@ import jwt from 'jsonwebtoken';
 import connectDB from './config/mongoose.js';
 import typeDefs from './graphql/typeDefs.js';
 import resolvers from './graphql/resolvers.js';
-//
-console.log("🔍 JWT_SECRET in service:", process.env.JWT_SECRET);
 
 // Connect to MongoDB
 connectDB();
@@ -76,7 +74,7 @@ async function startServer() {
     }
   }));
   //
-  app.listen(config.port, () => console.log(`🚀 Business and Events Microservice running at http://localhost:${config.port}/graphql`));
+  app.listen(config.port, () => console.log(`🚀 Business and Events Microservice running`));
 }
 //
 startServer();

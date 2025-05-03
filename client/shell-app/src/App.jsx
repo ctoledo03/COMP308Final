@@ -30,9 +30,6 @@ function App() {
   const [content, setContent] = useState(null)
 
   const [logout] = useMutation(LOGOUT_MUTATION, {
-    onCompleted: () => {
-      console.log("✅ Logged out successfully");
-    },
     onError: (error) => {
       console.error("Error logging out:", error);
     }
@@ -52,7 +49,6 @@ function App() {
       setIsLoggedIn(event.detail.isLoggedIn);
       const { data: freshData } = await refetch();
 
-      console.log(freshData);
       const user = freshData?.me; 
 
       if (user?.role === "resident") {
@@ -60,15 +56,12 @@ function App() {
       } else {
         setContent(<BusinessAndEventsApp me={user} />);
       }
-  
-      console.log('✅ Received loginSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
   
     const handleLogoutSuccess = (event) => {
       setIsLoggedIn(event.detail.isLoggedIn);
       logout();
       setContent(<UserAuth />);
-      console.log('✅ Received logoutSuccess event in ShellApp: ' + event.detail.isLoggedIn);
     };
 
     const handleSwitchView = async (event) => {

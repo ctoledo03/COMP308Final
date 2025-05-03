@@ -29,13 +29,11 @@ const CommunityEvents = () => {
         });
 
         const result = await res.json();
-        console.log(result)
         if (result.errors) {
           throw new Error(result.errors[0].message);
         }
 
         setExternalEvents(result.data.communityEvents);
-        console.log(result.data.communityEvents);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching external events:', err);
