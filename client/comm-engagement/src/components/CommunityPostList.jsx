@@ -73,6 +73,9 @@ const getLevelInfo = (xp) => {
 
 const CommunityPostList = ({ me }) => {
   const { loading, error, data, refetch } = useQuery(GET_COMMUNITY_POSTS);
+
+  console.log(error);
+  console.log(data);
   const [addPost] = useMutation(ADD_COMMUNITY_POST, { 
     onCompleted: () => {
       showReward("Post Created! +20 XP");

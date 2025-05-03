@@ -51,6 +51,7 @@ const BusinessDeals = ({ me }) => {
         if (errors) throw new Error(errors[0].message);
 
         if (data?.businessDeals) setExternalDeals(data.businessDeals);
+        console.log(data?.businessDeals);
       } catch (err) {
         console.error('Error fetching external deals:', err);
         setError(err.message);

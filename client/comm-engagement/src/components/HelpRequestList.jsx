@@ -68,6 +68,8 @@ const ACHIEVEMENTS = [
 // Main HelpRequest list component
 const HelpRequestList = ({ me }) => {
     const { loading, error, data, refetch } = useQuery(GET_HELP_REQUESTS);
+    console.log(error);
+    console.log(data);
     
     // Gamification state
     const [userPoints, setUserPoints] = useState(() => {

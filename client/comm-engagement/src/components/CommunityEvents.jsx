@@ -35,6 +35,7 @@ const CommunityEvents = () => {
         }
 
         setExternalEvents(result.data.communityEvents);
+        console.log(result.data.communityEvents);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching external events:', err);
