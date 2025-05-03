@@ -95,8 +95,10 @@ const BusinessListings = ({ me, addPoints, userStats }) => {
 
   if (loading)
     return <p className="text-white text-center mt-8">Loading...</p>;
-  if (error)
-    return <p className="text-red-500 text-center mt-8">Error loading listings. {"\n\n\n"}{error}</p>;
+  if (error) {
+    console.log(error.message)
+    return <p className="text-red-500 text-center mt-8">Error loading listings.</p>;
+  }
 
   return (
     <motion.div

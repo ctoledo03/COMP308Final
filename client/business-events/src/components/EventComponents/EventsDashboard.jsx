@@ -144,6 +144,11 @@ const EventsDashboard = ({ me }) => {
     window.dispatchEvent(new CustomEvent('logoutSuccess', { detail: { isLoggedIn: false } }));
   };
 
+  if (error) {
+    console.log(error.message)
+    return <p className="text-red-500 text-center mt-8">Error loading events.</p>;
+  }
+
   return (
     <ApolloProvider client={client}>
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
@@ -359,8 +364,6 @@ const EventsDashboard = ({ me }) => {
               <h2 className="text-lg font-semibold mb-4">My Events</h2>
               {loading ? (
                 <p>Loading events...</p>
-              ) : error ? (
-                <p className="text-red-400">Error loading events. {"\n\n\n"}{error}</p>
               ) : data.myCommunityEvents.length === 0 ? (
                 <p>No events yet. Create one above!</p>
               ) : (
