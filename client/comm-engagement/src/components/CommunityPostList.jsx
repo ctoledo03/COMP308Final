@@ -233,7 +233,7 @@ const CommunityPostList = ({ me }) => {
   };
 
   if (loading) return <p className="text-white">Loading...</p>;
-  if (error) return <p className="text-white">Error loading posts.</p>;
+  if (error) return <p className="text-white">Error loading posts.{"\n\n\n"}{error}</p>;
 
   const topPosts = getTopPosts();
 

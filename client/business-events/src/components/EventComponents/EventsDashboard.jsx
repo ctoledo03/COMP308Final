@@ -360,7 +360,7 @@ const EventsDashboard = ({ me }) => {
               {loading ? (
                 <p>Loading events...</p>
               ) : error ? (
-                <p className="text-red-400">Error loading events.</p>
+                <p className="text-red-400">Error loading events. {"\n\n\n"}{error}</p>
               ) : data.myCommunityEvents.length === 0 ? (
                 <p>No events yet. Create one above!</p>
               ) : (

@@ -49,9 +49,7 @@ const BusinessDashboard = ({ me }) => {
   const [notifications, setNotifications] = useState([]);
   const [showUserCard, setShowUserCard] = useState(false);
   
-
-  useEffect(() => {
-    // Update stats periodically
+  useEffect(() => {    
     const interval = setInterval(() => {
       setUserStats(calculateUserStats());
     }, 5000);
