@@ -8,7 +8,7 @@ const CommunityEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('http://localhost:4003/graphql', {
+        const res = await fetch('https://communityengagement-qdh2.onrender.com/graphql', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

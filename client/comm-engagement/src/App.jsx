@@ -69,6 +69,7 @@ const App = ({ me }) => {
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  console.log(me);
   
   // Track user activity for daily rewards
   useEffect(() => {

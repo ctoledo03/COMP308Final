@@ -16,6 +16,9 @@ const client = new ApolloClient({
 });
 
 const App = ({ me }) => {
+
+  console.log(me);
+
   return (
     <ApolloProvider client={client}>
       {me?.role === 'business_owner' ? <BusinessDashboard me={me} /> : <EventsDashboard me={me} />}
