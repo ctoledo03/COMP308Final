@@ -5,7 +5,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 
 // Set up Apollo Client
 const client = new ApolloClient({
-  uri: 'http://localhost:4001/graphql', // Set this to your actual GraphQL endpoint
+  uri: 'https://communityengagement-authmicroservice.onrender.com/graphql', // Set this to your actual GraphQL endpoint
   cache: new InMemoryCache(),
   credentials: 'include'
 });

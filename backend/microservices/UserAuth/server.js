@@ -25,10 +25,7 @@ const app = express();
 app.use(cors({
   origin: ['https://communityengagement.onrender.com',
            'https://communityengagement-clientuserauth.onrender.com', 
-           'http://localhost:3000',
-           'http://localhost:3001', 
-           'http://localhost:3002', 
-           'http://localhost:4000', 
+           'https://communityengagement-3cq8.onrender.com',
            'https://studio.apollographql.com'],
   credentials: true,
 }));

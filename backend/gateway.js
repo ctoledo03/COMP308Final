@@ -18,7 +18,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS and Cookie Parsing
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  origin: ['https://communityengagement.onrender.com', 
+           'https://communityengagement-clientuserauth.onrender.com', 
+           'https://communityengagement-clientcommengagement.onrender.com', 
+           'https://communityengagement-3cq8.onrender.com'],
   credentials: true,
 }));
 app.use(cookieParser());
@@ -27,7 +30,7 @@ app.use(cookieParser());
 const gateway = new ApolloGateway({
   supergraphSdl: new IntrospectAndCompose({
     subgraphs: [
-      { name: 'auth', url: 'http://localhost:4001/graphql' },
+      { name: 'auth', url: 'https://communityengagement-clientuserauth.onrender.com/graphql' },
       { name: 'community', url: 'http://localhost:4002/graphql' },
       { name: 'businessAndEvents', url: 'http://localhost:4003/graphql' },
     ],
