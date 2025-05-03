@@ -51,6 +51,8 @@ function App() {
     const handleLoginSuccess = async (event) => {
       setIsLoggedIn(event.detail.isLoggedIn);
       const { data: freshData } = await refetch();
+
+      console.log(freshData);
       const user = freshData?.me; 
 
       if (user?.role === "resident") {

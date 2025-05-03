@@ -11,14 +11,6 @@ const httpLink = createHttpLink({
   credentials: 'include', 
 });
 
-/*
-// Set up the Apollo Client for the API gateway
-const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql', // ✅ Updated to use API Gateway
-  credentials: 'include',
-});
-*/
-
 const client = new ApolloClient({
   link: httpLink,
   cache: new InMemoryCache(),
