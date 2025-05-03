@@ -7,7 +7,7 @@ import './index.css';
 
 // Set up the Apollo Client
 const httpLink = createHttpLink({
-  uri: 'https://communityengagement-gateway.onrender.com/graphql', 
+  uri: 'https://communityengagement-authmicroservice.onrender.com/graphql', 
   credentials: 'include', 
 });
 

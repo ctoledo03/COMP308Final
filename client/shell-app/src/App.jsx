@@ -53,8 +53,6 @@ function App() {
       const { data: freshData } = await refetch();
       const user = freshData?.me; 
 
-      console.log(user);
-  
       if (user?.role === "resident") {
         setContent(<CommEngagementApp me={user} />);
       } else {
