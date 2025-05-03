@@ -12,7 +12,7 @@ import ChatBox from "./components/Chatbox";
 
 // Apollo Client Setup
 const client = new ApolloClient({
-  uri: "http://localhost:4002/graphql",
+  uri: "https://communityengagement-commengmicroservice.onrender.com/graphql",
   cache: new InMemoryCache(),
   credentials: 'include',
   headers: {

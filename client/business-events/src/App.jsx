@@ -7,7 +7,7 @@ import EventsDashboard from "./components/EventComponents/EventsDashboard";
 
 // Apollo Client Setup
 const client = new ApolloClient({
-  uri: "http://localhost:4003/graphql",
+  uri: "https://communityengagement-qdh2.onrender.com/graphql",
   cache: new InMemoryCache(),
   credentials: 'include',
   headers: {

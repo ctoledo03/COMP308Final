@@ -30,9 +30,9 @@ app.use(cookieParser());
 const gateway = new ApolloGateway({
   supergraphSdl: new IntrospectAndCompose({
     subgraphs: [
-      { name: 'auth', url: 'https://communityengagement-clientuserauth.onrender.com/graphql' },
-      { name: 'community', url: 'http://localhost:4002/graphql' },
-      { name: 'businessAndEvents', url: 'http://localhost:4003/graphql' },
+      { name: 'auth', url: 'https://communityengagement-authmicroservice.onrender.com/graphql' },
+      { name: 'community', url: 'https://communityengagement-commengmicroservice.onrender.com/graphql' },
+      { name: 'businessAndEvents', url: 'https://communityengagement-qdh2.onrender.com/graphql' },
     ],
   }),
 });
