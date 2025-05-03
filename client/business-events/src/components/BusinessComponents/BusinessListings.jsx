@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { GraphQLError } from 'graphql';
 
 const GET_BUSINESS_LISTINGS = gql`
   query {
@@ -97,6 +98,9 @@ const BusinessListings = ({ me, addPoints, userStats }) => {
     return <p className="text-white text-center mt-8">Loading...</p>;
   if (error) {
     console.log(error.message)
+    return <p className="text-red-500 text-center mt-8">Error loading listings.</p>;
+  } else if (error instanceof GraphQLError) {
+    console.error("GraphQL error:", error.message);
     return <p className="text-red-500 text-center mt-8">Error loading listings.</p>;
   }
 

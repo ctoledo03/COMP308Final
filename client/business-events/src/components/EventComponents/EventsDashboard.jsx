@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, gql, ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { GraphQLError } from 'graphql';
 
 const client = new ApolloClient({
   uri: "https://communityengagement-qdh2.onrender.com/graphql",
@@ -146,6 +147,9 @@ const EventsDashboard = ({ me }) => {
 
   if (error) {
     console.log(error.message)
+    return <p className="text-red-500 text-center mt-8">Error loading events.</p>;
+  } else if (error instanceof GraphQLError) {
+    console.error("GraphQL error:", error.message);
     return <p className="text-red-500 text-center mt-8">Error loading events.</p>;
   }
 
