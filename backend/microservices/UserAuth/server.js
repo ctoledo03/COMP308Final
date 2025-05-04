@@ -27,8 +27,11 @@ app.use(cors({
            'https://communityengagement-clientuserauth.onrender.com', 
            'https://communityengagement-clientcommengagement.onrender.com',
            'https://communityengagement-clientbusev.onrender.com',
+           'https://communityengagement-qdh2.onrender.com',
            'https://studio.apollographql.com'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 
