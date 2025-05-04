@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const schema = buildSubgraphSchema([{ typeDefs: parse(typeDefs), resolvers }]);
 
 const server = new ApolloServer({
-  schema,
+  schema, 
   introspection: true,
 });
 
@@ -50,7 +50,7 @@ async function startServer() {
   app.use('/graphql', expressMiddleware(server, {
     context: async ({ req, res }) => {
       // Get the user token from the headers.
-      console.log('Cookies:', req.cookies);
+      console.log('Cookies:', req.cookies.token);
 
       const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
       let user = null;

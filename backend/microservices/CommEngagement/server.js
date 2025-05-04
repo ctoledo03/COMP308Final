@@ -17,8 +17,6 @@ import jwt from 'jsonwebtoken';
 import connectDB from './config/mongoose.js';
 import typeDefs from './graphql/typeDefs.js';
 import resolvers from './graphql/resolvers.js';
-//
-console.log("🔍 JWT_SECRET in service:", process.env.JWT_SECRET);
 
 // Connect to MongoDB
 connectDB();
@@ -33,16 +31,6 @@ app.use(cors({
            'https://studio.apollographql.com'],
   credentials: true,
 }));
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://communityengagement.onrender.com'); 
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
-
 
 // 
 app.use(cookieParser());
@@ -78,7 +66,7 @@ async function startServer() {
     }
   }));
   //
-  app.listen(config.port, () => console.log(`🚀 Product Microservice running at http://localhost:${config.port}/graphql`));
+  app.listen(config.port, () => console.log(`🚀 Product Microservice running`));
 }
 //
 startServer();
