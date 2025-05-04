@@ -26,7 +26,7 @@ app.use(cors({
   origin: ['https://communityengagement.onrender.com',
            'https://communityengagement-clientuserauth.onrender.com', 
            'https://communityengagement-clientcommengagement.onrender.com',
-           'https://communityengagement-3cq8.onrender.com',
+           'https://communityengagement-clientbusev.onrender.com',
            'https://studio.apollographql.com'],
   credentials: true,
 }));
