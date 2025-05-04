@@ -21,7 +21,8 @@ app.use(cors({
   origin: ['https://communityengagement.onrender.com', 
            'https://communityengagement-clientuserauth.onrender.com', 
            'https://communityengagement-clientcommengagement.onrender.com', 
-           'https://communityengagement-3cq8.onrender.com'],
+           'https://communityengagement-3cq8.onrender.com',
+           'https://studio.apollographql.com'],
   credentials: true,
 }));
 app.use(cookieParser());
@@ -51,7 +52,7 @@ async function startServer() {
 
   // Start Express server
   app.listen(4000, () => {
-    console.log(`🚀 API Gateway ready at http://localhost:4000/graphql`);
+    console.log(`🚀 API Gateway ready`);
   });
 }
 

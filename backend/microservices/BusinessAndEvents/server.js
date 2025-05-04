@@ -26,7 +26,7 @@ app.use(cors({
   origin: ['https://communityengagement.onrender.com',
            'https://communityengagement-clientuserauth.onrender.com', 
            'https://communityengagement-clientcommengagement.onrender.com',
-           'https://communityengagement-qdh2.onrender.com', 
+           'https://communityengagement-3cq8.onrender.com', 
            'http://localhost:4000', 
            'https://studio.apollographql.com'],
   credentials: true,
@@ -46,11 +46,12 @@ const server = new ApolloServer({
 
 async function startServer() {
   await server.start();
-  console.log('Cookies:', req.cookies);
   // Apply the Apollo GraphQL middleware and set the path to /graphql
   app.use('/graphql', expressMiddleware(server, {
     context: async ({ req, res }) => {
       // Get the user token from the headers.
+      console.log('Cookies:', req.cookies);
+
       const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
       let user = null;
       if (token) {
