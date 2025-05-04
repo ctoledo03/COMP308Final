@@ -23,21 +23,27 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: ['https://communityengagement.onrender.com',
-           'https://communityengagement-clientuserauth.onrender.com', 
-           'https://communityengagement-clientcommengagement.onrender.com',
-           'https://communityengagement-clientbusev.onrender.com',
-           'https://communityengagement-qdh2.onrender.com',
-           'https://studio.apollographql.com'],
+  origin: [
+    'https://communityengagement.onrender.com',
+    'https://communityengagement-clientuserauth.onrender.com',
+    'https://communityengagement-clientcommengagement.onrender.com',
+    'https://communityengagement-clientbusev.onrender.com',
+    'https://communityengagement-qdh2.onrender.com',
+    'http://localhost:3000',
+    'https://studio.apollographql.com'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400 
 }));
-
 
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.options('*', cors());
 
 const schema = buildSubgraphSchema([{ typeDefs: parse(typeDefs), resolvers }]);
 // 
